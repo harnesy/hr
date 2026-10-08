@@ -2,8 +2,8 @@ Licences in this repository
 
 1. Employee texts (employees/**: bundle.json, listing.json, docs/, skills/**/*.md)
    are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0),
-   full text in LICENSES/CC-BY-4.0.txt, unless the employee's bundle.json states
-   another licence from the allowed list in its "license" field.
+   full text in LICENSES/CC-BY-4.0.txt, or CC0-1.0 if the employee's bundle.json
+   says so in its "license" field.
    - Employees under employees/harnsy/: Text © 2026 Pavel Buchnev (harnsy).
    - Every other employee: © its publisher (publishers/<id>.json), who licenses
      it under the licence its bundle.json states.
@@ -19,3 +19,5 @@ Licences in this repository
 
 Not covered by any licence above: avatar images of employees under
 employees/harnsy/, and the names and logos "harnsy" and "hr.harnsy.dev".
+
+Contributor terms: TERMS.md.

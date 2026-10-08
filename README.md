@@ -34,7 +34,9 @@ cd tools/check && go run . --dir ../..
 
 ## Licences
 
-Employee texts: CC BY 4.0 unless stated otherwise; scripts in skills: MIT, Apache-2.0 or CC0; tools: MIT. Details and
-exceptions in [LICENSE](LICENSE).
+Employee texts: CC BY 4.0, or CC0 where the employee says so; scripts in skills: MIT, Apache-2.0 or CC0; tools: MIT.
+Details and exceptions in [LICENSE](LICENSE). Sending an employee means accepting the
+[contributor terms](TERMS.md).
 
-Questions and appeals: open an issue or write to hello@harnsy.dev.
+Appeals: comment on the pull request or open an issue (issues are public: no personal data). Reports of unlawful
+content and data requests: hello@harnsy.dev.

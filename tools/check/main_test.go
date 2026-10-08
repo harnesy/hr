@@ -24,7 +24,7 @@ func testEmployee(t *testing.T, files map[string]string, refs []any) []string {
 			t.Fatal(err)
 		}
 	}
-	write("publishers/acme.json", `{"name": "Acme", "description": "Test publisher.", "github": ["acme"]}`)
+	write("publishers/acme.json", `{"name": "Acme", "description": "Test publisher.", "github": ["acme"], "github_ids": [42]}`)
 	bundle := map[string]any{
 		"schema":  "harnsy.employee/v1",
 		"persona": map[string]any{"name": "Vera"},
@@ -155,8 +155,118 @@ func TestPullRequestSkipsGitFile(t *testing.T) {
 	pr, base := t.TempDir(), t.TempDir()
 	os.WriteFile(filepath.Join(pr, ".git"), []byte("gitdir: /elsewhere\n"), 0o644)
 	var p problems
-	checkPullRequest(&p, pr, base, "acme")
+	checkPullRequest(&p, pr, base, account{"acme", 42})
 	if len(p.list) > 0 {
 		t.Fatalf("a .git file is not a change, got:\n%s", strings.Join(p.list, "\n"))
+	}
+}
+
+func writeFiles(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+	for rel, content := range files {
+		f := filepath.Join(dir, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(f), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(f, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func joined(p problems) string { return strings.Join(p.list, "\n") }
+
+// The text of a community employee is CC-BY-4.0 or CC0-1.0; harnsy's own is CC-BY-4.0 (TERMS.md 3.1).
+func TestTextLicence(t *testing.T) {
+	for _, c := range []struct {
+		pub, lic string
+		ok       bool
+	}{
+		{"acme", "CC-BY-4.0", true}, {"acme", "CC0-1.0", true}, {"acme", "CC BY 4.0", true},
+		{"acme", "CC-BY-NC-4.0", false}, {"acme", "CC-BY-SA-4.0", false}, {"acme", "GPL-3.0-only", false},
+		{"acme", "LicenseRef-Mine", false}, {"harnsy", "CC-BY-4.0", true}, {"harnsy", "CC0-1.0", false},
+	} {
+		dir := t.TempDir()
+		bj, _ := json.Marshal(map[string]any{"schema": "harnsy.employee/v1", "persona": map[string]any{"name": "Vera"},
+			"role": map[string]any{"name": "Recorder", "prompt": "You are an AI agent."}, "license": c.lic})
+		writeFiles(t, dir, map[string]string{
+			"publishers/" + c.pub + ".json":                 `{"name": "P", "description": "", "github": ["acme"], "github_ids": [42]}`,
+			"employees/" + c.pub + "/rec/1.0.0/bundle.json": string(bj),
+		})
+		var p problems
+		checkTree(&p, dir)
+		if got := strings.Contains(joined(p), "license"); got == c.ok {
+			t.Errorf("%s %q: ok=%v, got:\n%s", c.pub, c.lic, c.ok, joined(p))
+		}
+	}
+}
+
+// A publisher is bound to the account id: a login taken over after a rename does not send under it.
+func TestPublisherAccountID(t *testing.T) {
+	base, pr := t.TempDir(), t.TempDir()
+	pub := `{"name": "Acme", "description": "", "github": ["acme"], "github_ids": [42]}`
+	writeFiles(t, base, map[string]string{"publishers/acme.json": pub})
+	writeFiles(t, pr, map[string]string{"publishers/acme.json": pub, "employees/acme/rec/1.0.0/listing.json": "{}"})
+	for _, c := range []struct {
+		a  account
+		ok bool
+	}{{account{"acme", 42}, true}, {account{"acme", 7}, false}, {account{"other", 42}, true}} {
+		var p problems
+		checkPullRequest(&p, pr, base, c.a)
+		if got := !strings.Contains(joined(p), "belongs to"); got != c.ok {
+			t.Errorf("%+v: ok=%v, got:\n%s", c.a, c.ok, joined(p))
+		}
+	}
+	// A new publisher names its login and id.
+	pr2 := t.TempDir()
+	writeFiles(t, pr2, map[string]string{"publishers/new.json": `{"name": "New", "description": "", "github": ["neo"]}`})
+	var p problems
+	checkPullRequest(&p, pr2, t.TempDir(), account{"neo", 9})
+	if !strings.Contains(joined(p), `your id 9 in "github_ids"`) {
+		t.Errorf("a new publisher without github_ids passed:\n%s", joined(p))
+	}
+}
+
+// A block is a date, without a reason (TERMS.md 6.4).
+func TestBannedIsADate(t *testing.T) {
+	for v, ok := range map[string]bool{"2026-10-08": true, "spam": false, "2026-10-08 copied prompts": false} {
+		dir := t.TempDir()
+		writeFiles(t, dir, map[string]string{"publishers/acme.json": `{"name": "Acme", "description": "", "github": ["acme"], "github_ids": [42], "banned": "` + v + `"}`})
+		var p problems
+		checkTree(&p, dir)
+		if got := !strings.Contains(joined(p), "banned"); got != ok {
+			t.Errorf("banned %q: ok=%v, got:\n%s", v, ok, joined(p))
+		}
+	}
+}
+
+// The description keeps the template's boxes ticked and names the base's terms version.
+func TestBody(t *testing.T) {
+	base := t.TempDir()
+	writeFiles(t, base, map[string]string{"TERMS.md": "# Terms\n\nVersion `2026-10-08.1` · effective 8 October 2026\n"})
+	ticked := "## Confirmations\n\nTerms: [contributor terms, version 2026-10-08.1](../blob/main/TERMS.md).\n\n" + strings.Repeat("- [x] yes\n", 6)
+	for name, c := range map[string]struct {
+		body, want string
+	}{
+		"ok":           {ticked, ""},
+		"crlf":         {strings.ReplaceAll(ticked, "\n", "\r\n"), ""},
+		"old version":  {strings.Replace(ticked, "2026-10-08.1", "2026-09-01.1", 1), "terms version"},
+		"one unticked": {ticked + "- [ ] no\n", "not ticked"},
+		"no template":  {"Here is my employee.", "terms version"},
+		"few boxes":    {strings.Replace(ticked, strings.Repeat("- [x] yes\n", 6), "- [x] yes\n", 1), "fewer than"},
+	} {
+		f := filepath.Join(t.TempDir(), "body.md")
+		os.WriteFile(f, []byte(c.body), 0o644)
+		var p problems
+		checkBody(&p, base, f)
+		if got := joined(p); (c.want == "") != (got == "") || !strings.Contains(got, c.want) {
+			t.Errorf("%s: want %q, got:\n%s", name, c.want, got)
+		}
+	}
+	// No TERMS.md on the base yet: nothing to check.
+	var p problems
+	checkBody(&p, t.TempDir(), filepath.Join(base, "missing"))
+	if len(p.list) > 0 {
+		t.Errorf("no TERMS.md on the base, got:\n%s", joined(p))
 	}
 }

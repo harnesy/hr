@@ -1,7 +1,8 @@
 // check reads the catalog and says what the hr.harnsy.dev signer would refuse. It never runs anything it reads.
 //
 //	check [--dir <catalog checkout>]                               every employee version and publisher
-//	check --dir <pr checkout> --base <base checkout> --author <login>  plus the pull-request rules
+//	check --dir <pr checkout> --base <base checkout> --author <login> --author-id <id> [--body <file>]
+//	                                                               plus the pull-request rules (and the template's boxes)
 //
 // Each problem is one line «path: what is wrong — how to fix»; in GitHub Actions also an ::error annotation. Exit 1 on any.
 package main
@@ -39,7 +40,16 @@ var (
 	httpRE    = regexp.MustCompile(`http://[^\s"'<>)\]]+`)
 	itemRefRE = regexp.MustCompile(`\b[Ii]tems? #[0-9]+`)
 	scriptLic = []string{"MIT License", "Apache License", "CC0"}
+	// textLic: the licences a community employee's text may carry (TERMS.md 3.1); ours are CC-BY-4.0.
+	textLic  = map[string]bool{"CC-BY-4.0": true, "CC0-1.0": true}
+	dayRE    = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`)
+	termsRE  = regexp.MustCompile("(?m)^Version `([0-9]{4}-[0-9]{2}-[0-9]{2}\\.[0-9]+)`")
+	boxOffRE = regexp.MustCompile(`(?m)^\s*[-*] \[ \]`)
+	boxOnRE  = regexp.MustCompile(`(?m)^\s*[-*] \[[xX]\]`)
 )
+
+// minBoxes: the confirmation boxes of .github/PULL_REQUEST_TEMPLATE.md.
+const minBoxes = 6
 
 type problems struct{ list []string }
 
@@ -55,11 +65,16 @@ func main() {
 	dir := flag.String("dir", ".", "the catalog checkout to check")
 	base := flag.String("base", "", "the base branch checkout: turns on the pull-request rules")
 	author := flag.String("author", "", "the pull request's GitHub login (with --base)")
+	authorID := flag.Int64("author-id", 0, "the pull request author's numeric GitHub id (with --base)")
+	body := flag.String("body", "", "a file with the pull request's description: the template's boxes and terms version (with --base)")
 	flag.Parse()
 	var p problems
 	versions := checkTree(&p, *dir)
 	if *base != "" {
-		checkPullRequest(&p, *dir, *base, *author)
+		checkPullRequest(&p, *dir, *base, account{*author, *authorID})
+		if *body != "" {
+			checkBody(&p, *base, *body)
+		}
 	}
 	for _, l := range p.list {
 		fmt.Println(l)
@@ -106,7 +121,30 @@ type publisher struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	GitHub      []string `json:"github"`
-	Banned      string   `json:"banned,omitempty"`
+	// GitHubIDs: the numeric ids of the accounts in "github". A login can be renamed and taken by someone else; the id
+	// stays, so the id decides who may send.
+	GitHubIDs []int64 `json:"github_ids"`
+	// Banned: the day the publisher was blocked, YYYY-MM-DD, and nothing else (the reason goes in the pull request).
+	Banned string `json:"banned,omitempty"`
+}
+
+// account is a pull request's author.
+type account struct {
+	login string
+	id    int64
+}
+
+// owns: the publisher lists the account — by its numeric id; by login only for a publisher file without ids.
+func (pb publisher) owns(a account) bool {
+	if len(pb.GitHubIDs) == 0 {
+		return contains(pb.GitHub, a.login)
+	}
+	for _, id := range pb.GitHubIDs {
+		if id == a.id && a.id != 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func readPublisher(file string) (publisher, error) {
@@ -132,7 +170,7 @@ func checkPublisher(p *problems, dir, file string) {
 	}
 	pb, err := readPublisher(file)
 	if err != nil {
-		p.add(rel, "%v — want {\"name\", \"description\", \"github\": [\"<login>\"]}", err)
+		p.add(rel, "%v — want {\"name\", \"description\", \"github\": [\"<login>\"], \"github_ids\": [<id>]}", err)
 		return
 	}
 	if err := oneLine("name", pb.Name, maxPubName*4); err != nil || utf8.RuneCountInString(pb.Name) > maxPubName {
@@ -148,6 +186,17 @@ func checkPublisher(p *problems, dir, file string) {
 		if !githubRE.MatchString(g) {
 			p.add(rel, "github: %q is not a GitHub login", g)
 		}
+	}
+	if len(pb.GitHubIDs) == 0 {
+		p.add(rel, "github_ids: list the numeric id of each account in \"github\" (\"id\" in https://api.github.com/users/<login>)")
+	}
+	for _, id := range pb.GitHubIDs {
+		if id <= 0 {
+			p.add(rel, "github_ids: %d is not a GitHub account id", id)
+		}
+	}
+	if pb.Banned != "" && !dayRE.MatchString(pb.Banned) {
+		p.add(rel, "banned: the day of the block, YYYY-MM-DD, and nothing else — the reason goes in the pull request")
 	}
 	latin(p, rel, pb.Name+" "+pb.Description)
 }
@@ -235,8 +284,13 @@ func checkVersion(p *problems, dir, v string) {
 		p.add(bf, "%v", err)
 	}
 	checkSkillRefs(p, bf, bj, skills)
-	if b.License == "" {
-		p.add(bf, "license: state the text's licence, e.g. \"CC-BY-4.0\"")
+	switch lic, _ := spdx("license", b.License); {
+	case b.License == "":
+		p.add(bf, "license: state the text's licence: \"CC-BY-4.0\" or \"CC0-1.0\"")
+	case pub == "harnsy" && lic != "CC-BY-4.0":
+		p.add(bf, "license: harnsy's own employees are \"CC-BY-4.0\"")
+	case !textLic[lic]:
+		p.add(bf, "license %q: an employee's text is \"CC-BY-4.0\" or \"CC0-1.0\", no other (TERMS.md 3.1); a source's own licence goes in attribution", b.License)
 	}
 	latin(p, bf, string(bj))
 	if a := b.Persona.Avatar; a != "" {
@@ -284,8 +338,8 @@ func latin(p *problems, file, s string) {
 }
 
 // checkPullRequest: one publisher, at most one new employee version, published versions untouched, the publisher's own
-// GitHub login.
-func checkPullRequest(p *problems, dir, base, author string) {
+// GitHub account.
+func checkPullRequest(p *problems, dir, base string, author account) {
 	changed := map[string]bool{}
 	for _, root := range []string{dir, base} {
 		filepath.WalkDir(root, func(f string, d fs.DirEntry, err error) error {
@@ -340,18 +394,18 @@ func checkPullRequest(p *problems, dir, base, author string) {
 		owner := filepath.Join(base, "publishers", pub+".json")
 		if pb, err := readPublisher(owner); err == nil {
 			if pb.Banned != "" {
-				p.add("publishers/"+pub+".json", "this publisher is blocked: %s", pb.Banned)
-			} else if !contains(pb.GitHub, author) {
+				p.add("publishers/"+pub+".json", "this publisher is blocked since %s", pb.Banned)
+			} else if !pb.owns(author) {
 				p.add("publishers/"+pub+".json", "publisher %q belongs to %s — send under your own publisher id", pub, strings.Join(pb.GitHub, ", "))
 			}
-		} else if pb, err := readPublisher(filepath.Join(dir, "publishers", pub+".json")); err != nil || !contains(pb.GitHub, author) {
-			p.add("publishers/"+pub+".json", "a new publisher: add publishers/%s.json with your GitHub login %q in \"github\"", pub, author)
+		} else if pb, err := readPublisher(filepath.Join(dir, "publishers", pub+".json")); err != nil || !contains(pb.GitHub, author.login) || len(pb.GitHubIDs) == 0 || !pb.owns(author) {
+			p.add("publishers/"+pub+".json", "a new publisher: add publishers/%s.json with your GitHub login %q in \"github\" and your id %d in \"github_ids\"", pub, author.login, author.id)
 		}
 	}
 }
 
 // checkRevokedChange: entries are only added, and only for the author's own publishers.
-func checkRevokedChange(p *problems, dir, base, author string) {
+func checkRevokedChange(p *problems, dir, base string, author account) {
 	read := func(root string) map[string]bool {
 		var r []string
 		b, _ := os.ReadFile(filepath.Join(root, "revoked.json"))
@@ -373,9 +427,33 @@ func checkRevokedChange(p *problems, dir, base, author string) {
 			continue
 		}
 		pub, _, _ := strings.Cut(x, "/")
-		if pb, err := readPublisher(filepath.Join(base, "publishers", pub+".json")); err != nil || !contains(pb.GitHub, author) {
+		if pb, err := readPublisher(filepath.Join(base, "publishers", pub+".json")); err != nil || !pb.owns(author) {
 			p.add("revoked.json", "%s: only its publisher withdraws a version", x)
 		}
+	}
+}
+
+// checkBody: the pull request's description keeps the template's confirmations, every box ticked, and names the terms
+// version of the base branch's TERMS.md (TERMS.md 2.2). No TERMS.md on the base: nothing to accept yet.
+func checkBody(p *problems, base, file string) {
+	terms, err := os.ReadFile(filepath.Join(base, "TERMS.md"))
+	if err != nil {
+		return
+	}
+	m := termsRE.FindSubmatch(terms)
+	if m == nil {
+		p.add("TERMS.md", "no «Version `YYYY-MM-DD.N`» line — maintainers: put it back")
+		return
+	}
+	b, _ := os.ReadFile(file)
+	body := strings.ReplaceAll(string(b), "\r\n", "\n")
+	switch {
+	case !strings.Contains(body, "version "+string(m[1])):
+		p.add("pull request", "the description does not name the contributor terms version %s — use the pull request template (Confirmations)", m[1])
+	case boxOffRE.MatchString(body):
+		p.add("pull request", "a confirmation box is not ticked — tick every box under Confirmations, or say in a comment what stops you")
+	case len(boxOnRE.FindAllString(body, -1)) < minBoxes:
+		p.add("pull request", "the description has fewer than %d ticked confirmations — use the pull request template", minBoxes)
 	}
 }
 
