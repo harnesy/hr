@@ -1,0 +1,10 @@
+{
+  "title": "UX writer",
+  "tags": [
+    "ux writing",
+    "microcopy",
+    "content design"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

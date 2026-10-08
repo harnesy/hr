@@ -1,0 +1,10 @@
+{
+  "title": "Localization manager",
+  "tags": [
+    "localization",
+    "translation",
+    "glossary"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

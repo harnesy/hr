@@ -1,0 +1,10 @@
+{
+  "title": "Customer support agent",
+  "tags": [
+    "support",
+    "help desk",
+    "customer service"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

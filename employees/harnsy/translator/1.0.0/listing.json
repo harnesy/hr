@@ -1,0 +1,10 @@
+{
+  "title": "Translator",
+  "tags": [
+    "translation",
+    "localization",
+    "multilingual"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

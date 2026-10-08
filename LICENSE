@@ -1,0 +1,21 @@
+Licences in this repository
+
+1. Employee texts (employees/**: bundle.json, listing.json, docs/, skills/**/*.md)
+   are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0),
+   full text in LICENSES/CC-BY-4.0.txt, unless the employee's bundle.json states
+   another licence from the allowed list in its "license" field.
+   - Employees under employees/harnsy/: Text © 2026 Pavel Buchnev (harnsy).
+   - Every other employee: © its publisher (publishers/<id>.json), who licenses
+     it under the licence its bundle.json states.
+   Works an employee is built on are credited in its "attribution" list and on
+   https://hr.harnsy.dev/notices.
+
+2. Scripts inside skills (employees/**/skills/<skill>/, any file that is not
+   Markdown) are source code under MIT, Apache-2.0 or CC0-1.0, stated in that
+   skill's LICENSE file.
+
+3. The checking tools (tools/) are licensed under the MIT License,
+   LICENSES/MIT.txt.
+
+Not covered by any licence above: avatar images of employees under
+employees/harnsy/, and the names and logos "harnsy" and "hr.harnsy.dev".

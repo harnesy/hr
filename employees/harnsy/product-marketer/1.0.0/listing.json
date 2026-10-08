@@ -1,0 +1,10 @@
+{
+  "title": "Product marketing manager",
+  "tags": [
+    "marketing",
+    "launches",
+    "positioning"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

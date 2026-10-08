@@ -1,0 +1,10 @@
+{
+  "title": "API technical writer",
+  "tags": [
+    "api documentation",
+    "technical writing",
+    "developer docs"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Copywriter",
+  "tags": [
+    "copywriting",
+    "landing pages",
+    "ux writing"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}
