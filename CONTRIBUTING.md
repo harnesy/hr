@@ -82,8 +82,8 @@ version named in the template. In short:
 
 ## 5. Withdrawing, blocking, appeals
 
-- To withdraw your version, send a pull request adding `"<id>/<name>@<version>"` to `revoked.json`. People who hired it
-  keep it, marked as withdrawn.
+- To withdraw your version, send a pull request adding `"<id>/<name>@<version>"` to `revoked.json`. People who already hired
+  it keep their copy.
 - A harmful employee, impersonation, repeated copying or false licences, or a flood of junk gets the publisher blocked
   and its versions withdrawn. A person decides every block. We always say why in a comment on the pull request.
 - **Appeals:** comment on the pull request or open an Issue (Issues are public: no personal data). Reports of unlawful
