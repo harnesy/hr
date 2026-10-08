@@ -1,0 +1,10 @@
+{
+  "title": "Conversion optimization specialist",
+  "tags": [
+    "cro",
+    "a/b testing",
+    "landing pages"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

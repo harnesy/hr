@@ -1,0 +1,10 @@
+{
+  "title": "Email marketing specialist",
+  "tags": [
+    "email marketing",
+    "newsletters",
+    "sequences"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}
