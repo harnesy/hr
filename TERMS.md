@@ -86,7 +86,7 @@ You promise that, for each employee:
 
 6.3 The AI reviewer recommends; **a person confirms every block**.
 
-6.4 A withdrawn version is added to `revoked.json` and is no longer offered. The reason, as a short category (for example «content rules», «rights claim», «withdrawn by publisher») with no further details about you, is given in the comment on the pull request or Issue that withdrew it; the list itself carries no reason. A block is shown in your publisher file as a date, without reasons. People who already hired a withdrawn employee keep their copy.
+6.4 A withdrawn version is added to `revoked.json` and is no longer offered. The reason, as a short category (for example «content rules», «rights claim», «withdrawn by publisher») with no further details about you, is given in the comment on the pull request or Issue that withdrew it; the list itself carries no reason. A block is shown in your publisher file as a date, without reasons. People who already hired a withdrawn employee keep their copy. The file of a withdrawn version may stay available at its address for people who already hired it; for a rights claim, a legal order, a secret or someone else's personal data we remove it.
 
 ## 7. Appeals and reports
 
