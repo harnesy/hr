@@ -270,3 +270,44 @@ func TestBody(t *testing.T) {
 		t.Errorf("no TERMS.md on the base, got:\n%s", joined(p))
 	}
 }
+
+// SPDX expressions as harnsy reads them (#1674).
+func TestSPDXExpr(t *testing.T) {
+	for in, want := range map[string]string{
+		"CC-BY-4.0 AND MIT":                             "CC-BY-4.0 AND MIT",
+		"GPL-2.0-or-later WITH Classpath-exception-2.0": "GPL-2.0-or-later WITH Classpath-exception-2.0",
+		"( mit or Apache-2.0 )  and CC-BY-4.0":          "(mit OR Apache-2.0) AND CC-BY-4.0",
+		"cc by 4.0":                                     "CC-BY-4.0",
+		"MIT MIT":                                       "",
+		"MIT AND":                                       "",
+		"(MIT":                                          "",
+		"CC BY 4.0 AND MIT":                             "",
+		"MIT)":                                          "",
+		"((((MIT))))":                                   "((((MIT))))",
+		"(((((MIT)))))":                                 "",
+		strings.Repeat("MIT AND ", 10) + "MIT":          "",
+	} {
+		got, err := spdx("license", in)
+		if (err != nil) != (want == "") || got != want {
+			t.Errorf("%q: got %q %v, want %q", in, got, err, want)
+		}
+	}
+}
+
+// The bundle's licence: text CC-BY-4.0 / CC0-1.0, an expression may add the scripts' licences.
+func TestBundleLicenceExpr(t *testing.T) {
+	for _, c := range []struct {
+		pub, lic string
+		ok       bool
+	}{
+		{"acme", "CC-BY-4.0 AND MIT", true}, {"acme", "cc-by-4.0 and mit", true}, {"acme", "(CC0-1.0 AND Apache-2.0)", true}, {"acme", "MIT", false},
+		{"acme", "CC-BY-4.0 AND GPL-3.0-only", false}, {"acme", "CC-BY-4.0 WITH Classpath-exception-2.0", false},
+		{"harnsy", "CC-BY-4.0 AND MIT", true}, {"harnsy", "CC0-1.0 AND MIT", false},
+	} {
+		var p problems
+		checkBundleLicence(&p, "bundle.json", c.pub, c.lic)
+		if (len(p.list) == 0) != c.ok {
+			t.Errorf("%s %q: ok=%v, got:\n%s", c.pub, c.lic, c.ok, joined(p))
+		}
+	}
+}

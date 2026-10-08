@@ -26,7 +26,8 @@ a login is renamed. `harnsy` and the site's own paths (`api`, `teams`, `notices`
 Add `employees/<id>/<name>/1.0.0/`:
 
 - `bundle.json` — the employee (schema `harnsy.employee/v1`), in English: character, principles, voice, role, prompt,
-  competencies, `license` (`CC-BY-4.0` or `CC0-1.0`) and `attribution`;
+  competencies, `license` (`CC-BY-4.0` or `CC0-1.0`; an SPDX expression may add the scripts' licence, e.g.
+  `CC-BY-4.0 AND MIT`) and `attribution`;
 - `listing.json` — the card: `title`, `tags`;
 - `avatar.png` (or .jpg / .webp), at least 512×512, optional — no real person, brand or art you have no rights to;
 - `docs/persona-casebook.md`, optional;

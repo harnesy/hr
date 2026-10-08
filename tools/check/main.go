@@ -41,11 +41,14 @@ var (
 	itemRefRE = regexp.MustCompile(`\b[Ii]tems? #[0-9]+`)
 	scriptLic = []string{"MIT License", "Apache License", "CC0"}
 	// textLic: the licences a community employee's text may carry (TERMS.md 3.1); ours are CC-BY-4.0.
-	textLic  = map[string]bool{"CC-BY-4.0": true, "CC0-1.0": true}
-	dayRE    = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`)
-	termsRE  = regexp.MustCompile("(?m)^Version `([0-9]{4}-[0-9]{2}-[0-9]{2}\\.[0-9]+)`")
-	boxOffRE = regexp.MustCompile(`(?m)^\s*[-*] \[ \]`)
-	boxOnRE  = regexp.MustCompile(`(?m)^\s*[-*] \[[xX]\]`)
+	textLic   = map[string]bool{"CC-BY-4.0": true, "CC0-1.0": true}
+	scriptIDs = map[string]bool{"MIT": true, "Apache-2.0": true, "CC0-1.0": true}
+	// canonicalID: the allowed ids by their lower case.
+	canonicalID = map[string]string{"cc-by-4.0": "CC-BY-4.0", "cc0-1.0": "CC0-1.0", "mit": "MIT", "apache-2.0": "Apache-2.0"}
+	dayRE       = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`)
+	termsRE     = regexp.MustCompile("(?m)^Version `([0-9]{4}-[0-9]{2}-[0-9]{2}\\.[0-9]+)`")
+	boxOffRE    = regexp.MustCompile(`(?m)^\s*[-*] \[ \]`)
+	boxOnRE     = regexp.MustCompile(`(?m)^\s*[-*] \[[xX]\]`)
 )
 
 // minBoxes: the confirmation boxes of .github/PULL_REQUEST_TEMPLATE.md.
@@ -284,14 +287,7 @@ func checkVersion(p *problems, dir, v string) {
 		p.add(bf, "%v", err)
 	}
 	checkSkillRefs(p, bf, bj, skills)
-	switch lic, _ := spdx("license", b.License); {
-	case b.License == "":
-		p.add(bf, "license: state the text's licence: \"CC-BY-4.0\" or \"CC0-1.0\"")
-	case pub == "harnsy" && lic != "CC-BY-4.0":
-		p.add(bf, "license: harnsy's own employees are \"CC-BY-4.0\"")
-	case !textLic[lic]:
-		p.add(bf, "license %q: an employee's text is \"CC-BY-4.0\" or \"CC0-1.0\", no other (TERMS.md 3.1); a source's own licence goes in attribution", b.License)
-	}
+	checkBundleLicence(p, bf, pub, b.License)
 	latin(p, bf, string(bj))
 	if a := b.Persona.Avatar; a != "" {
 		ab, err := os.ReadFile(filepath.Join(v, a))
@@ -324,6 +320,32 @@ func checkVersion(p *problems, dir, v string) {
 		} else if (l.Harnsy != "" && !harnsyRE.MatchString(l.Harnsy)) || (l.CVURL != "" && !strings.HasPrefix(l.CVURL, "https://hr.harnsy.dev/")) {
 			p.add(filepath.Join(rel, "listing.json"), "harnsy wants >=MAJOR.MINOR.PATCH; cv_url only on https://hr.harnsy.dev/")
 		}
+	}
+}
+
+// checkBundleLicence: the text is CC-BY-4.0 or CC0-1.0 (TERMS.md 3.1; harnsy's own CC-BY-4.0); an expression may add the
+// scripts' MIT, Apache-2.0 or CC0-1.0 (TERMS.md 3.1a), nothing else and no WITH exception. A source's own licence goes in
+// attribution.
+func checkBundleLicence(p *problems, bf, pub, v string) {
+	norm, ids, err := spdxExpr(v)
+	if v == "" {
+		p.add(bf, "license: state the text's licence: \"CC-BY-4.0\" or \"CC0-1.0\"")
+		return
+	}
+	if err != nil { // checkBundle reports it
+		return
+	}
+	text, ok := false, !strings.Contains(norm, " WITH ")
+	for _, id := range ids {
+		id = canonicalID[strings.ToLower(id)] // SPDX ids match in any case
+		text = text || textLic[id] && (pub != "harnsy" || id == "CC-BY-4.0")
+		ok = ok && (textLic[id] || scriptIDs[id])
+	}
+	switch {
+	case !ok || !text && pub != "harnsy":
+		p.add(bf, "license %q: an employee's text is \"CC-BY-4.0\" or \"CC0-1.0\" (with the scripts' MIT, Apache-2.0 or CC0-1.0 at most), no other (TERMS.md 3.1); a source's own licence goes in attribution", v)
+	case !text:
+		p.add(bf, "license %q: harnsy's own employees are \"CC-BY-4.0\"", v)
 	}
 }
 

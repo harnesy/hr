@@ -117,20 +117,134 @@ const (
 	maxAttrURL     = 300
 )
 
-// spdx is a licence as harnsy stores it: "" stays "" (older bundles), a known spelling (spaces trimmed and collapsed)
-// becomes its SPDX id.
+// spdx is a licence as harnsy stores it (harnsy #1674): "" stays "" (older bundles), a known spelling (the whole string,
+// spaces trimmed and collapsed) becomes its SPDX id, anything else is an SPDX expression stored normalised.
 func spdx(field, v string) (string, error) {
+	norm, _, err := spdxExpr(v)
+	if err != nil {
+		return "", fmt.Errorf("%s %q: %v", field, v, err)
+	}
+	return norm, nil
+}
+
+const (
+	maxExprIDs   = 10
+	maxExprDepth = 4
+	maxExprLen   = 200
+)
+
+// spdxExpr parses an SPDX licence expression: expr = term { (AND | OR) term }; term = ( expr ) | id [ WITH id ];
+// operators in any case. It returns the expression normalised (operators in capitals, one space around them,
+// parentheses tight) and its licence ids (WITH exceptions not among them).
+func spdxExpr(v string) (string, []string, error) {
 	v = strings.TrimSpace(v)
 	if v == "" {
-		return "", nil
+		return "", nil, nil
 	}
 	if id, ok := licenseSpellings[strings.ToLower(strings.Join(strings.Fields(v), " "))]; ok {
-		return id, nil
+		return id, []string{id}, nil
 	}
-	if !licenseRE.MatchString(v) {
-		return "", fmt.Errorf("%s %q: an SPDX id (CC-BY-4.0) or LicenseRef-…", field, v)
+	if len(v) > maxExprLen {
+		return "", nil, fmt.Errorf("at most %d characters", maxExprLen)
 	}
-	return v, nil
+	ps := &exprParser{toks: strings.Fields(strings.NewReplacer("(", " ( ", ")", " ) ").Replace(v))}
+	out, err := ps.expr(0)
+	if err == nil && ps.pos < len(ps.toks) {
+		err = fmt.Errorf("unexpected %q", ps.toks[ps.pos])
+	}
+	if err == nil && ps.nIDs > maxExprIDs {
+		err = fmt.Errorf("at most %d licence ids", maxExprIDs)
+	}
+	if err != nil {
+		return "", nil, fmt.Errorf("an SPDX id (CC-BY-4.0), LicenseRef-… or an SPDX expression (CC-BY-4.0 AND MIT): %v", err)
+	}
+	return out, ps.ids, nil
+}
+
+type exprParser struct {
+	toks []string
+	pos  int
+	ids  []string
+	nIDs int
+}
+
+func (ps *exprParser) peek() string {
+	if ps.pos < len(ps.toks) {
+		return ps.toks[ps.pos]
+	}
+	return ""
+}
+
+func isOp(t string) bool {
+	switch strings.ToUpper(t) {
+	case "AND", "OR", "WITH":
+		return true
+	}
+	return false
+}
+
+func (ps *exprParser) id() (string, error) {
+	t := ps.peek()
+	switch {
+	case t == "":
+		return "", fmt.Errorf("ends where a licence id is due")
+	case t == "(" || t == ")" || isOp(t) || !licenseRE.MatchString(t):
+		return "", fmt.Errorf("%q where a licence id is due", t)
+	}
+	ps.pos++
+	ps.nIDs++
+	return t, nil
+}
+
+func (ps *exprParser) term(depth int) (string, error) {
+	if ps.peek() == "(" {
+		if depth >= maxExprDepth {
+			return "", fmt.Errorf("at most %d levels of parentheses", maxExprDepth)
+		}
+		ps.pos++
+		in, err := ps.expr(depth + 1)
+		if err != nil {
+			return "", err
+		}
+		if ps.peek() != ")" {
+			return "", fmt.Errorf("a ( without its )")
+		}
+		ps.pos++
+		return "(" + in + ")", nil
+	}
+	id, err := ps.id()
+	if err != nil {
+		return "", err
+	}
+	ps.ids = append(ps.ids, id)
+	if strings.EqualFold(ps.peek(), "WITH") {
+		ps.pos++
+		exc, err := ps.id()
+		if err != nil {
+			return "", err
+		}
+		return id + " WITH " + exc, nil
+	}
+	return id, nil
+}
+
+func (ps *exprParser) expr(depth int) (string, error) {
+	out, err := ps.term(depth)
+	if err != nil {
+		return "", err
+	}
+	for {
+		op := strings.ToUpper(ps.peek())
+		if op != "AND" && op != "OR" {
+			return out, nil
+		}
+		ps.pos++
+		t, err := ps.term(depth)
+		if err != nil {
+			return "", err
+		}
+		out += " " + op + " " + t
+	}
 }
 
 // credit reads the bundle's licence and attribution by harnsy's hire rules (#1605): the licence normalised, every entry
