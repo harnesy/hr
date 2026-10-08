@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -167,7 +166,6 @@ func checkVersion(p *problems, dir, v string) {
 	}
 	// Files: what the signer packs, plus skills; text only except the avatar.
 	var total int64
-	skillScripts := map[string]bool{}
 	filepath.WalkDir(v, func(f string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
@@ -182,11 +180,7 @@ func checkVersion(p *problems, dir, v string) {
 		}
 		switch {
 		case in == "bundle.json", in == "listing.json", in == casebookFile, avatarRE.MatchString(in):
-		case strings.HasPrefix(in, "skills/") && strings.Count(in, "/") >= 2:
-			skill := strings.Split(in, "/")[1]
-			if !strings.HasSuffix(in, ".md") && path.Base(in) != "LICENSE" {
-				skillScripts[skill] = true
-			}
+		case strings.HasPrefix(in, "skills/"): // its layout: checkSkills
 		default:
 			p.add(fr, "not a catalog file — an employee folder holds bundle.json, listing.json, avatar.png|jpg|webp, %s and skills/<skill>/…", casebookFile)
 			return nil
@@ -220,19 +214,7 @@ func checkVersion(p *problems, dir, v string) {
 	if total > maxVersion {
 		p.add(rel, "%d bytes in all, at most %d", total, maxVersion)
 	}
-	for skill := range skillScripts {
-		lic, err := os.ReadFile(filepath.Join(v, "skills", skill, "LICENSE"))
-		ok := err == nil
-		if ok {
-			ok = false
-			for _, l := range scriptLic {
-				ok = ok || bytes.Contains(lic, []byte(l))
-			}
-		}
-		if !ok {
-			p.add(filepath.Join(rel, "skills", skill), "scripts need skills/%s/LICENSE with the MIT, Apache-2.0 or CC0 text", skill)
-		}
-	}
+	skills := checkSkills(p, dir, v)
 	// bundle.json by the signer's rules.
 	bf := filepath.Join(rel, "bundle.json")
 	bj, err := os.ReadFile(filepath.Join(v, "bundle.json"))
@@ -252,6 +234,7 @@ func checkVersion(p *problems, dir, v string) {
 	if err := checkBundle(&b); err != nil {
 		p.add(bf, "%v", err)
 	}
+	checkSkillRefs(p, bf, bj, skills)
 	if b.License == "" {
 		p.add(bf, "license: state the text's licence, e.g. \"CC-BY-4.0\"")
 	}
@@ -309,8 +292,11 @@ func checkPullRequest(p *problems, dir, base, author string) {
 			if err != nil {
 				return nil
 			}
-			if d.IsDir() && d.Name() == ".git" {
-				return filepath.SkipDir
+			if d.Name() == ".git" { // a checkout's .git: a folder, or a file in a git worktree
+				if d.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
 			}
 			if d.IsDir() {
 				return nil
@@ -400,4 +386,283 @@ func contains(xs []string, s string) bool {
 		}
 	}
 	return false
+}
+
+// Skills (harnsy docs/bundle-v1.md «Skills»; rules as harnsy's skills.go reads a bundle): skills/<name>/ holds SKILL.md,
+// an optional LICENSE and flat scripts/<file>; bundle.json "skills" names every folder.
+const (
+	skillsMax      = 5
+	skillMaxFiles  = 20
+	skillDocMax    = 64 << 10 // SKILL.md, LICENSE
+	skillScriptMax = 256 << 10
+	skillsTotalMax = 2 << 20
+	skillDescMax   = 1024
+)
+
+var (
+	skillNameRe   = regexp.MustCompile(`^[a-z0-9-]{1,40}$`)
+	skillScriptRe = regexp.MustCompile(`^[A-Za-z0-9._-]{1,64}$`)
+	frontKeyRe    = regexp.MustCompile(`^([A-Za-z0-9_-]+):`)
+	// skillFrontKeys: the SKILL.md frontmatter keys harnsy takes; allowed-tools would grant tools without a prompt, hooks
+	// would run commands.
+	skillFrontKeys = map[string]bool{"name": true, "description": true, "license": true, "version": true, "when_to_use": true, "argument-hint": true}
+	// windowsReserved: device names Windows opens instead of a file, with any extension.
+	windowsReserved = map[string]bool{"CON": true, "PRN": true, "AUX": true, "NUL": true,
+		"COM1": true, "COM2": true, "COM3": true, "COM4": true, "COM5": true, "COM6": true, "COM7": true, "COM8": true, "COM9": true,
+		"LPT1": true, "LPT2": true, "LPT3": true, "LPT4": true, "LPT5": true, "LPT6": true, "LPT7": true, "LPT8": true, "LPT9": true}
+	// inlineShellRe: what Claude Code runs as a skill loads, without a tool call: `!` right before a backtick, or a fence
+	// opening with ``` or ~~~ and then `!`.
+	inlineShellRe = regexp.MustCompile("!\\s*`|(?m)^[ \\t>]*(```|~~~)[^\\n]*!")
+)
+
+// checkSkills checks the layout of <version>/skills/ and returns the skill folders it holds. File contents (UTF-8, no
+// NUL, no secrets) and symlinks are checked by the walk in checkVersion.
+func checkSkills(p *problems, dir, v string) map[string]bool {
+	found := map[string]bool{}
+	root := filepath.Join(v, "skills")
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		if st, e := os.Lstat(root); e == nil && !st.IsDir() {
+			p.add(relTo(dir, root), "a file — skills/ is a folder of skills/<name>/")
+		}
+		return found
+	}
+	total := 0
+	for _, e := range entries {
+		at := relTo(dir, filepath.Join(root, e.Name()))
+		switch {
+		case e.Type()&fs.ModeSymlink != 0:
+			continue // reported by the walk
+		case !e.IsDir():
+			p.add(at, "a file directly in skills/ — a skill is a folder skills/<name>/ with SKILL.md")
+			continue
+		case !skillNameRe.MatchString(e.Name()):
+			p.add(at, "skill name %q — use lowercase latin letters, digits and -, at most 40", e.Name())
+			continue
+		}
+		found[e.Name()] = true
+		total += checkSkill(p, dir, filepath.Join(root, e.Name()), e.Name())
+	}
+	if len(found) > skillsMax {
+		p.add(relTo(dir, root), "%d skills, at most %d — keep the ones the role needs most", len(found), skillsMax)
+	}
+	if total > skillsTotalMax {
+		p.add(relTo(dir, root), "%d bytes in all skills, at most %d — make the scripts smaller", total, skillsTotalMax)
+	}
+	return found
+}
+
+// checkSkill checks one skills/<name>/ folder and returns its bytes.
+func checkSkill(p *problems, dir, sd, name string) int {
+	at := relTo(dir, sd)
+	files, size := 0, 0
+	var doc, lic []byte
+	hasDoc, hasLic, hasScripts := false, false, false
+	read := func(f string, max int) []byte {
+		b, err := os.ReadFile(f)
+		if err != nil {
+			return nil
+		}
+		files++
+		size += len(b)
+		if len(b) > max {
+			p.add(relTo(dir, f), "%d bytes, at most %d", len(b), max)
+		}
+		return b
+	}
+	entries, _ := os.ReadDir(sd)
+	for _, e := range entries {
+		f := filepath.Join(sd, e.Name())
+		switch {
+		case e.Type()&fs.ModeSymlink != 0:
+			continue // reported by the walk
+		case e.Name() == "SKILL.md" && e.Type().IsRegular():
+			doc, hasDoc = read(f, skillDocMax), true
+		case e.Name() == "LICENSE" && e.Type().IsRegular():
+			lic, hasLic = read(f, skillDocMax), true
+		case e.Name() == "scripts" && e.IsDir():
+			folded := map[string]string{}
+			scripts, _ := os.ReadDir(f)
+			for _, s := range scripts {
+				sf := filepath.Join(f, s.Name())
+				switch {
+				case s.Type()&fs.ModeSymlink != 0:
+					continue
+				case s.IsDir():
+					p.add(relTo(dir, sf), "a folder under scripts/ — keep scripts flat: skills/%s/scripts/<file>", name)
+					continue
+				}
+				if err := skillScriptName(s.Name()); err != nil {
+					p.add(relTo(dir, sf), "%v — rename it", err)
+				}
+				if other, dup := folded[strings.ToLower(s.Name())]; dup {
+					p.add(relTo(dir, sf), "%q has the name of %q in another letter case — rename one", s.Name(), other)
+				}
+				folded[strings.ToLower(s.Name())] = s.Name()
+				read(sf, skillScriptMax)
+				hasScripts = true
+			}
+		default:
+			p.add(relTo(dir, f), "not a skill file — a skill holds SKILL.md, LICENSE and scripts/<file> only (no hooks, commands, agents, MCP servers or plugin files)")
+		}
+	}
+	if files > skillMaxFiles {
+		p.add(at, "%d files, at most %d per skill", files, skillMaxFiles)
+	}
+	if !hasDoc {
+		p.add(at, "no SKILL.md — add it with a frontmatter (name, description) and the steps")
+	} else if utf8.Valid(doc) {
+		if err := checkSkillDoc(name, doc); err != nil {
+			p.add(relTo(dir, filepath.Join(sd, "SKILL.md")), "%v", err)
+		}
+	}
+	for f, b := range map[string][]byte{"SKILL.md": doc, "LICENSE": lic} {
+		if inlineShellRe.Match(b) {
+			p.add(relTo(dir, filepath.Join(sd, f)), "runs inline shell (`!` before a backtick, or a ```! fence) — put commands in scripts/ for the agent's Bash tool")
+		}
+	}
+	if hasScripts {
+		ok := false
+		for _, l := range scriptLic {
+			ok = ok || (hasLic && bytes.Contains(lic, []byte(l)))
+		}
+		if !ok {
+			p.add(at, "scripts need skills/%s/LICENSE with the MIT, Apache-2.0 or CC0 text", name)
+		}
+	}
+	return size
+}
+
+// skillScriptName checks a file name under scripts/: a portable name no file system reads as another.
+func skillScriptName(name string) error {
+	switch {
+	case !skillScriptRe.MatchString(name):
+		return fmt.Errorf("script name %q: latin letters, digits, '.', '_' and '-', at most 64", name)
+	case strings.HasPrefix(name, "."):
+		return fmt.Errorf("script name %q: a hidden file", name)
+	case strings.HasSuffix(name, "."):
+		return fmt.Errorf("script name %q ends in a dot", name)
+	}
+	stem, _, _ := strings.Cut(name, ".")
+	if windowsReserved[strings.ToUpper(stem)] {
+		return fmt.Errorf("script name %q is a device name on Windows", name)
+	}
+	return nil
+}
+
+// skillFrontmatter reads SKILL.md's frontmatter: its top-level keys and their one-line values. Only `key: value` lines,
+// comments and indented continuations are read; anything else refuses it, so no key hides from the check.
+func skillFrontmatter(doc string) (map[string]string, error) {
+	doc = strings.ReplaceAll(doc, "\r\n", "\n")
+	rest, ok := strings.CutPrefix(doc, "---\n")
+	if !ok {
+		return nil, fmt.Errorf("no frontmatter — start with a --- line, then name: and description:, then ---")
+	}
+	head, _, ok := strings.Cut(rest, "\n---")
+	if !ok {
+		return nil, fmt.Errorf("the frontmatter has no closing --- — end it with a --- line")
+	}
+	out := map[string]string{}
+	for _, line := range strings.Split(head, "\n") {
+		switch {
+		case strings.TrimSpace(line) == "", strings.HasPrefix(line, "#"):
+			continue
+		case strings.HasPrefix(line, " "), strings.HasPrefix(line, "\t"):
+			continue // a continuation of the key above
+		}
+		m := frontKeyRe.FindStringSubmatch(line)
+		if m == nil {
+			return nil, fmt.Errorf("frontmatter line %q — write one `key: value` per line", line)
+		}
+		if _, dup := out[m[1]]; dup {
+			return nil, fmt.Errorf("frontmatter has %s twice — keep one", m[1])
+		}
+		out[m[1]] = strings.Trim(strings.TrimSpace(line[len(m[0]):]), `"'`)
+	}
+	return out, nil
+}
+
+// checkSkillDoc checks SKILL.md's frontmatter: the skill's own name, when to use it, nothing beyond the agent's own
+// permissions.
+func checkSkillDoc(name string, raw []byte) error {
+	front, err := skillFrontmatter(string(raw))
+	if err != nil {
+		return err
+	}
+	keys := make([]string, 0, len(front))
+	for k := range front {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		if !skillFrontKeys[k] {
+			return fmt.Errorf("frontmatter key %q is not taken (allowed-tools would grant tools without a prompt, hooks would run commands) — "+
+				"keep name, description, license, version, when_to_use, argument-hint", k)
+		}
+	}
+	if front["name"] != name {
+		return fmt.Errorf("frontmatter name %q is not the folder's name — write name: %s", front["name"], name)
+	}
+	if d := front["description"]; d == "" || len(d) > skillDescMax {
+		return fmt.Errorf("frontmatter description: say when to use the skill, 1..%d bytes", skillDescMax)
+	}
+	return nil
+}
+
+// checkSkillRefs: bundle.json "skills" names exactly the skill folders, as {name, description} objects (a plain string
+// is an older label and carries nothing).
+func checkSkillRefs(p *problems, bf string, bj []byte, folders map[string]bool) {
+	var doc struct {
+		Skills json.RawMessage `json:"skills"`
+	}
+	json.Unmarshal(bj, &doc)
+	named := map[string]bool{}
+	if raw := bytes.TrimSpace(doc.Skills); len(raw) > 0 && !bytes.Equal(raw, []byte("null")) {
+		var items []json.RawMessage
+		if err := json.Unmarshal(raw, &items); err != nil {
+			p.add(bf, "skills: not a list — write \"skills\": [{\"name\": \"<skill>\", \"description\": \"…\"}]")
+			return
+		}
+		for _, it := range items {
+			var label string
+			if json.Unmarshal(it, &label) == nil {
+				continue
+			}
+			var s struct {
+				Name        string `json:"name"`
+				Description string `json:"description"`
+			}
+			if err := json.Unmarshal(it, &s); err != nil {
+				p.add(bf, "skills: %s is not {name, description} — write one object per skill", it)
+				continue
+			}
+			switch {
+			case !skillNameRe.MatchString(s.Name):
+				p.add(bf, "skills: name %q — use lowercase latin letters, digits and -, at most 40", s.Name)
+			case named[s.Name]:
+				p.add(bf, "skills: %q is listed twice — keep one", s.Name)
+			case !folders[s.Name]:
+				p.add(bf, "skills: %q has no folder skills/%s/ — add it or remove the entry", s.Name, s.Name)
+			}
+			named[s.Name] = true
+		}
+		if len(named) > skillsMax {
+			p.add(bf, "skills: %d, at most %d", len(named), skillsMax)
+		}
+	}
+	missing := []string{}
+	for f := range folders {
+		if !named[f] {
+			missing = append(missing, f)
+		}
+	}
+	sort.Strings(missing)
+	for _, f := range missing {
+		p.add(bf, "skills: folder skills/%s/ is not named — add {\"name\": %q, \"description\": \"…\"} to \"skills\"", f, f)
+	}
+}
+
+func relTo(dir, f string) string {
+	r, _ := filepath.Rel(dir, f)
+	return r
 }

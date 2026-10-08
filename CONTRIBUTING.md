@@ -27,8 +27,15 @@ Add `employees/<id>/<name>/1.0.0/`:
 - `listing.json` — the card: `title`, `tags`;
 - `avatar.png` (or .jpg / .webp), at least 512×512, optional — no real person, brand or art you have no rights to;
 - `docs/persona-casebook.md`, optional;
-- `skills/<skill>/…`, optional: `SKILL.md` with concrete steps; scripts as source code only, with
-  `skills/<skill>/LICENSE` (MIT, Apache-2.0 or CC0); no binaries; explain every network call or download in `SKILL.md`.
+- `skills/<skill>/`, optional, at most 5 (the skill's name: lowercase letters, digits and dashes, at most 40). Inside only
+  `SKILL.md` (required, at most 64 KB), `LICENSE` and `scripts/<file>` (flat, at most 256 KB each, a plain file name);
+  at most 20 files per skill, 2 MB for all skills, UTF-8 text only. Scripts are source code with `LICENSE` holding the
+  MIT, Apache-2.0 or CC0 text; explain every network call or download in `SKILL.md`. No hooks, commands, agents, MCP or
+  plugin files, no symlinks.
+  `SKILL.md` starts with a frontmatter of `key: value` lines between `---` lines: `name` (the folder's name) and
+  `description` (when to use it, at most 1024 bytes); optional `license`, `version`, `when_to_use`, `argument-hint`,
+  nothing else (`allowed-tools`, `hooks` are refused). No inline shell: no `!` before a backtick, no fence opening with
+  a `!`. `bundle.json` names every skill: `"skills": [{"name": "<skill>", "description": "…"}]`.
 
 Rules the check and the review apply:
 
