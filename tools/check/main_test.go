@@ -108,6 +108,8 @@ func TestSkills(t *testing.T) {
 		{"skills[] missing a folder", nil, nil, `skills: folder skills/video-record/ is not named`},
 		{"skills[] only a string", nil, []any{"video-record"}, `skills: folder skills/video-record/ is not named`},
 		{"skills[] names a missing folder", nil, []any{ref("video-record"), ref("other")}, `skills: "other" has no folder skills/other/`},
+		{"listing floor below the skills floor", map[string]string{"listing.json": `{"harnsy":">=0.9.9"}`}, one, `harnsy ">=0.9.9": a bundle with skills needs >=0.10.0`},
+		{"listing floor at the skills floor", map[string]string{"listing.json": `{"harnsy":">=0.10.0"}`}, one, ""},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
