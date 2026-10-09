@@ -35,7 +35,8 @@ const (
 	maxCasebook  = 64 << 10
 	minAvatarPx  = 512
 	maxFiles     = 16
-	floorHarnsy  = ">=0.11.0" // the catalog's floor (contract @271fca89): a lower harnsy refuses the bundle
+	floorHarnsy  = ">=0.10.0" // the catalog's floor (contract @271fca89; hiring ships in 0.10.0): a lower harnsy refuses the bundle
+	skillsFloor  = "0.10.0"   // a bundle with skills needs harnsy >= this (signer's skills.go): an older one would hire it without them
 )
 
 var (

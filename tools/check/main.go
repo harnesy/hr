@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -319,6 +320,8 @@ func checkVersion(p *problems, dir, v string) {
 			p.add(filepath.Join(rel, "listing.json"), "%v", err)
 		} else if (l.Harnsy != "" && !harnsyRE.MatchString(l.Harnsy)) || (l.CVURL != "" && !strings.HasPrefix(l.CVURL, "https://hr.harnsy.dev/")) {
 			p.add(filepath.Join(rel, "listing.json"), "harnsy wants >=MAJOR.MINOR.PATCH; cv_url only on https://hr.harnsy.dev/")
+		} else if len(skills) > 0 && l.Harnsy != "" && harnsyBelow(l.Harnsy, skillsFloor) {
+			p.add(filepath.Join(rel, "listing.json"), "harnsy %q: a bundle with skills needs >=%s", l.Harnsy, skillsFloor)
 		}
 	}
 }
@@ -347,6 +350,19 @@ func checkBundleLicence(p *problems, bf, pub, v string) {
 	case !text:
 		p.add(bf, "license %q: harnsy's own employees are \"CC-BY-4.0\"", v)
 	}
+}
+
+// harnsyBelow: ">=A.B.C" is below the version floor (both MAJOR.MINOR.PATCH, already matched by harnsyRE).
+func harnsyBelow(expr, floor string) bool {
+	a, b := strings.Split(strings.TrimPrefix(expr, ">="), "."), strings.Split(floor, ".")
+	for i := range 3 {
+		x, _ := strconv.Atoi(a[i])
+		y, _ := strconv.Atoi(b[i])
+		if x != y {
+			return x < y
+		}
+	}
+	return false
 }
 
 // latin refuses letters of other scripts: catalog texts are English.
