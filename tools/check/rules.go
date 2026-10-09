@@ -22,6 +22,7 @@ const (
 	maxTexts      = 64 << 10  // mandate + deliverable + prompt + persona.character
 	maxComps      = 32
 	maxAvatar     = 5 << 20
+	maxCardLine   = 400 // listing.json subtitle and license_note, bytes, one line each (the feed signer takes the same)
 )
 
 var (
