@@ -110,6 +110,10 @@ func TestSkills(t *testing.T) {
 		{"skills[] names a missing folder", nil, []any{ref("video-record"), ref("other")}, `skills: "other" has no folder skills/other/`},
 		{"listing floor below the skills floor", map[string]string{"listing.json": `{"harnsy":">=0.9.9"}`}, one, `harnsy ">=0.9.9": a bundle with skills needs >=0.10.0`},
 		{"listing floor at the skills floor", map[string]string{"listing.json": `{"harnsy":">=0.10.0"}`}, one, ""},
+		{"listing subtitle and license_note", map[string]string{"listing.json": `{"subtitle":"A character in the spirit of Ada Lovelace.","license_note":"No rights in the names are granted."}`}, one, ""},
+		{"listing subtitle on two lines", map[string]string{"listing.json": `{"subtitle":"one\ntwo"}`}, one, "subtitle: one line, printable characters only"},
+		{"listing license_note too long", map[string]string{"listing.json": `{"license_note":"` + strings.Repeat("x", 401) + `"}`}, one, "license_note: one line, 1..400 bytes"},
+		{"listing unknown key", map[string]string{"listing.json": `{"subline":"x"}`}, one, `unknown field "subline"`},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

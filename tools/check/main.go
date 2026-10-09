@@ -263,6 +263,8 @@ func checkVersion(p *problems, dir, v string) {
 			Harnsy        string   `json:"harnsy"`
 			PublisherName string   `json:"publisher_name"`
 			CVURL         string   `json:"cv_url"`
+			Subtitle      string   `json:"subtitle"`     // a line under the name on the card (legends: the «in the spirit of» sentence)
+			LicenseNote   string   `json:"license_note"` // a line beside the licence (legends: no rights in names or likenesses)
 		}
 		dec := json.NewDecoder(bytes.NewReader(lb))
 		dec.DisallowUnknownFields()
@@ -272,6 +274,13 @@ func checkVersion(p *problems, dir, v string) {
 			p.add(filepath.Join(rel, "listing.json"), "harnsy wants >=MAJOR.MINOR.PATCH; cv_url only on https://hr.harnsy.dev/")
 		} else if len(skills) > 0 && l.Harnsy != "" && harnsyBelow(l.Harnsy, skillsFloor) {
 			p.add(filepath.Join(rel, "listing.json"), "harnsy %q: a bundle with skills needs >=%s", l.Harnsy, skillsFloor)
+		}
+		for _, f := range []struct{ name, v string }{{"subtitle", l.Subtitle}, {"license_note", l.LicenseNote}} {
+			if f.v != "" {
+				if err := oneLine(f.name, f.v, maxCardLine); err != nil {
+					p.add(filepath.Join(rel, "listing.json"), "%v", err)
+				}
+			}
 		}
 	}
 }
