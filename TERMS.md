@@ -1,6 +1,6 @@
 # harnsy catalogue contributor terms
 
-Version `2026-10-08.1` · effective 8 October 2026
+Version `2026-10-10.1` · effective 10 October 2026
 
 ## In short
 
