@@ -4,6 +4,8 @@ name: check
 on:
   pull_request:
     branches: [main]
+    # edited: the confirmations in the description are part of the check.
+    types: [opened, synchronize, reopened, edited]
 permissions:
   contents: read
 jobs:
@@ -12,26 +14,29 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Base branch (the check's code)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: base
           persist-credentials: false
       - name: Pull request (files to read)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: pr
           persist-credentials: false
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: '1.22'
           cache: false
       - name: Check
         env:
           AUTHOR: ${{ github.event.pull_request.user.login }}
+          AUTHOR_ID: ${{ github.event.pull_request.user.id }}
+          BODY: ${{ github.event.pull_request.body }}
         run: |
           cd base/tools/check
           go build -buildvcs=false -o "$RUNNER_TEMP/check" .
           cd "$GITHUB_WORKSPACE"
-          "$RUNNER_TEMP/check" --dir pr --base base --author "$AUTHOR"
+          printf '%s' "$BODY" > "$RUNNER_TEMP/body.md"
+          "$RUNNER_TEMP/check" --dir pr --base base --author "$AUTHOR" --author-id "$AUTHOR_ID" --body "$RUNNER_TEMP/body.md"

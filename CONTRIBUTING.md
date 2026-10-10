@@ -1,6 +1,7 @@
 # Sending an employee
 
-Anyone can send an employee. You need a GitHub account; no harnsy licence is needed.
+Anyone can send an employee. You need a GitHub account and must be at least 18; no harnsy licence is needed. The public
+repository keeps its whole history: what you send here, and your GitHub name, can be read by everyone for good.
 
 ## 1. Your publisher id
 
@@ -11,24 +12,34 @@ Pick an id of lowercase letters, digits and dashes (for example `anna-petrova`).
 {
   "name": "Anna Petrova",
   "description": "One or two sentences about you or your team, at most 300 characters.",
-  "github": ["your-github-login"]
+  "github": ["your-github-login"],
+  "github_ids": [1234567]
 }
 ```
 
-The name is what hr.harnsy.dev shows as the author. Only the GitHub logins listed there can send employees under this
-id. `harnsy` and the site's own paths (`api`, `teams`, `notices`, …) are taken.
+The name is what hr.harnsy.dev shows as the author. `github_ids` holds the numeric id of each account in `github`
+(the `id` at `https://api.github.com/users/<login>`): only those accounts can send employees under this id, even after
+a login is renamed. `harnsy` and the site's own paths (`api`, `teams`, `notices`, …) are taken.
 
 ## 2. The employee
 
 Add `employees/<id>/<name>/1.0.0/`:
 
 - `bundle.json` — the employee (schema `harnsy.employee/v1`), in English: character, principles, voice, role, prompt,
-  competencies, `license` and `attribution`;
+  competencies, `license` (`CC-BY-4.0` or `CC0-1.0`; an SPDX expression may add the scripts' licence, e.g.
+  `CC-BY-4.0 AND MIT`) and `attribution`;
 - `listing.json` — the card: `title`, `tags`;
 - `avatar.png` (or .jpg / .webp), at least 512×512, optional — no real person, brand or art you have no rights to;
 - `docs/persona-casebook.md`, optional;
-- `skills/<skill>/…`, optional: `SKILL.md` with concrete steps; scripts as source code only, with
-  `skills/<skill>/LICENSE` (MIT, Apache-2.0 or CC0); no binaries; explain every network call or download in `SKILL.md`.
+- `skills/<skill>/`, optional, at most 5 (the skill's name: lowercase letters, digits and dashes, at most 40). Inside only
+  `SKILL.md` (required, at most 64 KB), `LICENSE` and `scripts/<file>` (flat, at most 256 KB each, a plain file name);
+  at most 20 files per skill, 2 MB for all skills, UTF-8 text only. Scripts are source code with `LICENSE` holding the
+  MIT, Apache-2.0 or CC0 text; explain every network call or download in `SKILL.md`. No hooks, commands, agents, MCP or
+  plugin files, no symlinks.
+  `SKILL.md` starts with a frontmatter of `key: value` lines between `---` lines: `name` (the folder's name) and
+  `description` (when to use it, at most 1024 bytes); optional `license`, `version`, `when_to_use`, `argument-hint`,
+  nothing else (`allowed-tools`, `hooks` are refused). No inline shell: no `!` before a backtick, no fence opening with
+  a `!`. `bundle.json` names every skill: `"skills": [{"name": "<skill>", "description": "…"}]`.
 
 Rules the check and the review apply:
 
@@ -55,16 +66,32 @@ cd tools/check && go run . --dir ../..
   Fix them in the same pull request, as many rounds as needed.
 - A person reads the review and merges or closes. Merged employees appear on hr.harnsy.dev within an hour.
 
-## 4. Licence of what you send
+## 4. Licence and terms of what you send
 
-By sending a pull request you confirm that you have the right to publish its content and you license it under the
-licence your `bundle.json` states (CC BY 4.0 if you are unsure), and its scripts under the licence in their `LICENSE`
-file, so that anyone may use it and harnsy may check, sign and list it.
+By opening a pull request with the confirmation boxes ticked you accept the [contributor terms](TERMS.md) in the
+version named in the template. In short:
 
-## 5. Withdrawing and blocking
+- You confirm you have the right to publish everything you send. If you work for a company or used a tool, you have
+  their permission and the tool's terms allow it.
+- You license the **text** (and the avatar) to everyone under **CC BY 4.0 or CC0-1.0** (as `bundle.json` says) and the
+  **scripts** under **MIT, Apache-2.0 or CC0** (as the skill's `LICENSE` says). No other licence is accepted.
+- You also let harnsy check, sign, list and display the employee on hr.harnsy.dev, with your shown name and GitHub link.
+- The licence cannot be taken back for copies already taken, and the git history and forks stay: withdrawing stops us
+  offering the employee, it does not erase it.
+- Our signature means «checked against our rules», not «safe».
 
-- To withdraw your version, send a pull request adding `"<id>/<name>@<version>"` to `revoked.json`. People who hired it
-  keep it, marked as withdrawn.
-- A malicious employee, impersonation, repeated copying or false licences, or a flood of junk gets a publisher blocked
-  and its versions withdrawn. A person decides every block. Appeals: comment on the pull request or write to
-  hello@harnsy.dev.
+## 5. Withdrawing, blocking, appeals
+
+- To withdraw your version, send a pull request adding `"<id>/<name>@<version>"` to `revoked.json`. People who already hired
+  it keep their copy.
+- A harmful employee, impersonation, repeated copying or false licences, or a flood of junk gets the publisher blocked
+  and its versions withdrawn. A person decides every block. We always say why in a comment on the pull request.
+- **Appeals:** comment on the pull request or open an Issue (Issues are public: no personal data). Reports of unlawful
+  content: write to hello@harnsy.dev, not in an Issue.
+
+## 6. Your data
+
+We collect no e-mail. Your GitHub name, shown name and description are public, and so are the names and e-mails in your
+commits: use GitHub's private «noreply» address for commits. If you committed a secret, change it at once; it stays in
+the history. Deleting or correcting: hello@harnsy.dev; we cannot erase git history or forks. Full terms:
+[TERMS.md](TERMS.md).
