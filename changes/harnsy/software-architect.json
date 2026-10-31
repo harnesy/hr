@@ -1,0 +1,9 @@
+{
+  "1.1.0": [
+    "Compares two real options for a code change on interface size, callers touched, migration cost and reversibility, and says what would change the choice.",
+    "Writes one-page decision records in your project's own format, naming who decided, what gets worse and the check that keeps the code to it.",
+    "Plans module moves as small steps that each keep behaviour unchanged, each with its own build, test and structure check.",
+    "Answers developers before risky structural changes, and gives OK or no on hard size limits with a written reason.",
+    "Keeps code structure in check with code-structure: a size scan before and after every planned move."
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "title": "Example company: runway scenarios (example values, not data)",
+  "currency": "EUR",
+  "start_month": "2027-01",
+  "months": 24,
+  "label": "Scenario, not a forecast: every figure follows from the assumptions listed with it.",
+  "assumptions": {
+    "start_cash": {
+      "value": 600000,
+      "unit": "money",
+      "meaning": "cash in the bank at the start of month 1",
+      "source": "bank statement, last day of the month before month 1",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "start_customers": {
+      "value": 200,
+      "unit": "count",
+      "meaning": "paying customers at the start of month 1",
+      "source": "billing export",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "new_customers_per_month": {
+      "value": 12,
+      "unit": "count",
+      "meaning": "new paying customers in month 1",
+      "source": "average of the last 6 months, billing export",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "new_customers_growth": {
+      "value": 0.02,
+      "unit": "share per month",
+      "meaning": "growth of new customers per month, 0.03 = 3 %",
+      "source": "founder's sales plan",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "monthly_churn": {
+      "value": 0.015,
+      "unit": "share per month",
+      "meaning": "customers lost in a month / customers at its start",
+      "source": "unit-economics sheet, last 6 months",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "price_per_customer_month": {
+      "value": 400,
+      "unit": "money",
+      "meaning": "recurring revenue per customer per month",
+      "source": "price list and billing export",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "gross_margin": {
+      "value": 0.78,
+      "unit": "share",
+      "meaning": "(revenue - cost of revenue) / revenue",
+      "source": "accountant's management accounts",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "headcount_start": {
+      "value": 8,
+      "unit": "people",
+      "meaning": "people paid at the start of month 1",
+      "source": "payroll",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "hires_per_month": {
+      "value": 0.5,
+      "unit": "people per month",
+      "meaning": "net hires per month (an average; 0.5 = one every two months)",
+      "source": "founder's hiring plan",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "cost_per_head_month": {
+      "value": 7000,
+      "unit": "money",
+      "meaning": "full monthly cost of one person",
+      "source": "payroll, full cost per person",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "other_costs_month": {
+      "value": 25000,
+      "unit": "money",
+      "meaning": "all other operating costs in month 1",
+      "source": "management accounts, average of 3 months",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "other_costs_growth": {
+      "value": 0.01,
+      "unit": "share per month",
+      "meaning": "growth of other costs per month",
+      "source": "founder's estimate",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "funding_amount": {
+      "value": 0,
+      "unit": "money",
+      "meaning": "cash received from a planned raise or loan (0 = none)",
+      "source": "no raise in the base case",
+      "date": "2026-12-31",
+      "owner": "founder"
+    },
+    "funding_month": {
+      "value": 0,
+      "unit": "month number",
+      "meaning": "month in which that cash arrives (0 = none)",
+      "source": "no raise in the base case",
+      "date": "2026-12-31",
+      "owner": "founder"
+    }
+  },
+  "scenarios": {
+    "base": {
+      "overrides": {},
+      "trigger": "new customers and churn stay near the last six months"
+    },
+    "downside": {
+      "overrides": {
+        "new_customers_per_month": {
+          "value": 7,
+          "source": "founder: two largest channels slow down",
+          "date": "2026-12-31",
+          "owner": "founder"
+        },
+        "monthly_churn": {
+          "value": 0.03,
+          "source": "founder: worst quarter so far",
+          "date": "2026-12-31",
+          "owner": "founder"
+        }
+      },
+      "trigger": "two months in a row with fewer than 9 new customers"
+    },
+    "upside": {
+      "overrides": {
+        "new_customers_per_month": {
+          "value": 18,
+          "source": "founder: partner channel goes live",
+          "date": "2026-12-31",
+          "owner": "founder"
+        }
+      },
+      "trigger": "partner channel signed and live"
+    }
+  }
+}

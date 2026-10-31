@@ -1,0 +1,7 @@
+{
+  "1.1.0": [
+    "Keeps pipeline code in check: scans file and function sizes before and after a change and reports the difference.",
+    "Learns the project's own rules and tools before the first change.",
+    "Builds each behaviour test-first and shows the passing test run."
+  ]
+}

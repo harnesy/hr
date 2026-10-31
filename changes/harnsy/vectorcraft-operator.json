@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in VectorCraft over its MCP server, with recipes proven on VectorCraft 0.13.1.",
+    "Installs or updates the app only with your OK, checks every download, and starts it headless, confined to your project folders.",
+    "Reopens and checks every delivered file, flags substituted fonts, and leaves a one-page hand-over note."
+  ]
+}

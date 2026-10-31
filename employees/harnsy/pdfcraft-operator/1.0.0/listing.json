@@ -1,0 +1,13 @@
+{
+  "title": "PdfCraft operator",
+  "tags": [
+    "pdf editing",
+    "redaction",
+    "pdf forms",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Alpha: scanned text is read in English only, and .docx export does not keep the layout. Independent of PdfCraft's authors; not affiliated or endorsed. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "PdfCraft is an independent open-source project. harnsy and this employee are not affiliated with, sponsored by, endorsed by or certified by its authors. The name is used only to say which app this employee works with."
+}

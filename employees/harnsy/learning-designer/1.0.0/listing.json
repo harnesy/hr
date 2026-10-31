@@ -1,0 +1,10 @@
+{
+  "title": "Learning designer",
+  "tags": [
+    "course design",
+    "learning objectives",
+    "quizzes"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

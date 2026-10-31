@@ -1,0 +1,6 @@
+{
+  "1.0.0": [
+    "First version: builds KickSide module screens in Vue to the platform's rules: its controls, theme colours and pages that fit the shell.",
+    "Checks each screen in a development copy and hands the commit to the reviewer with what to look at."
+  ]
+}

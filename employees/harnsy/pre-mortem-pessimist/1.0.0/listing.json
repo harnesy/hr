@@ -1,0 +1,11 @@
+{
+  "title": "Pre-mortem facilitator",
+  "tags": [
+    "risk",
+    "pre-mortem",
+    "planning"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Archetype: professional pessimist. A fictional AI character defined only by how it works; not based on any real person."
+}

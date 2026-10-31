@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: windows, widgets and input for programs in a terminal, laid out in cells, with Kitty or Sixel pictures and a cell fallback.",
+    "Checks every state on screen: text and a picture at the smallest size, long and empty data, every mode, keyboard reach and visible focus.",
+    "Worked stack: shell windows in Lua on Wippy, checked with the module's harness and live through the app's workshop on a scratch app."
+  ]
+}

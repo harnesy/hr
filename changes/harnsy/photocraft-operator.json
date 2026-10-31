@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in PhotoCraft over its MCP server, with eight recipes proven on PhotoCraft 0.10.0.",
+    "Installs or updates the app only with your OK, checks every download, and starts it confined to your project folders.",
+    "Reopens and checks every delivered file, flags location data in photos, and leaves a one-page hand-over note."
+  ]
+}

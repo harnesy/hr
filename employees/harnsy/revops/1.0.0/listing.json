@@ -1,0 +1,10 @@
+{
+  "title": "Revenue operations specialist",
+  "tags": [
+    "crm",
+    "pipeline",
+    "lead routing"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

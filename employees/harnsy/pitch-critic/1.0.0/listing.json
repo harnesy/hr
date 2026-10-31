@@ -1,0 +1,11 @@
+{
+  "title": "Pitch critic",
+  "tags": [
+    "pitch decks",
+    "business plans",
+    "investor questions"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Archetype: sceptical investor. A fictional AI character defined only by how it works; not based on any real person."
+}

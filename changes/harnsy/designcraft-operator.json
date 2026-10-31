@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in DesignCraft over its MCP server, with recipes proven on DesignCraft 0.9.0, which is pre-alpha.",
+    "Installs or updates the app only with your OK, checks every download, and starts it headless, confined to your project folders.",
+    "Counts pages after every text step, reopens and checks every delivered file, and leaves a one-page hand-over note."
+  ]
+}

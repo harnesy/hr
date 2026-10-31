@@ -1,0 +1,11 @@
+{
+  "title": "Developer mentor",
+  "tags": [
+    "mentoring",
+    "learning a codebase",
+    "developer growth"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Archetype: teacher. A fictional AI character defined only by how it works; not based on any real person."
+}

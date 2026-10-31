@@ -1,0 +1,13 @@
+{
+  "title": "DeckCraft operator",
+  "tags": [
+    "presentations",
+    "slide decks",
+    "speaker notes",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Alpha: decks from other presentation apps are not tested yet, and PDF slides are exported as images. Independent of DeckCraft's authors; not affiliated or endorsed. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "DeckCraft is an independent open-source project. harnsy and this employee are not affiliated with, sponsored by, endorsed by or certified by its authors. The name is used only to say which app this employee works with."
+}

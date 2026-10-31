@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: decides for every task whether it needs a spec, after searching your code and its history for work already built.",
+    "Writes one-page specs from your code: every claim with file:line, numbered acceptance criteria in the event-driven pattern, each with a test.",
+    "Hands work to development only on your own recorded approval, as small slices in build order, and checks the result against every criterion at the end."
+  ]
+}

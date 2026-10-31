@@ -5,6 +5,6 @@
     "design system",
     "accessibility"
   ],
-  "harnsy": ">=0.11.0",
+  "harnsy": ">=0.10.0",
   "publisher_name": "harnsy"
 }

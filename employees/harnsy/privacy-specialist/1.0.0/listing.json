@@ -1,0 +1,10 @@
+{
+  "title": "Privacy specialist",
+  "tags": [
+    "privacy",
+    "record of processing",
+    "data requests"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

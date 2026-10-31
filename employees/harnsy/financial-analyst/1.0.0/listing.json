@@ -1,0 +1,10 @@
+{
+  "title": "Financial analyst",
+  "tags": [
+    "budget",
+    "plan vs actual",
+    "forecast"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

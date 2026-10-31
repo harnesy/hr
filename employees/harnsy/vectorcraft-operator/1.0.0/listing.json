@@ -1,0 +1,13 @@
+{
+  "title": "VectorCraft operator",
+  "tags": [
+    "vector graphics",
+    "logos and icons",
+    "svg export",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Alpha: VectorCraft is in alpha; .ai files from other apps may not open as they were made. Independent of VectorCraft's authors; not affiliated or endorsed. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "VectorCraft is an independent open-source project. harnsy and this employee are not affiliated with, sponsored by, endorsed by or certified by its authors. The name is used only to say which app this employee works with."
+}

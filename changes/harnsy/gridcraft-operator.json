@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in GridCraft over its MCP server, with recipes proven on GridCraft 0.8.0.",
+    "GridCraft has no folder limits yet: runs only in a dedicated project folder, with your OK, and checks afterwards that nothing outside it changed.",
+    "Checks every formula result, reopens every delivered file, and leaves a one-page hand-over note."
+  ]
+}

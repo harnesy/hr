@@ -1,0 +1,15 @@
+{
+  "title": "KickSide DevOps engineer",
+  "tags": [
+    "kickside",
+    "wippy",
+    "docker",
+    "nginx",
+    "postgres",
+    "backups"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Runs KickSide copies on servers; made by harnsy, not an official KickSide or Wippy product. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "KickSide is a source-available platform and Wippy an open-source runtime. This employee is made by harnsy and is not an official KickSide or Wippy product, and neither has reviewed or certified it. The names are used only to say which platform this employee works with."
+}
