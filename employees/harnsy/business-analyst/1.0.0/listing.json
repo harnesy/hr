@@ -1,0 +1,10 @@
+{
+  "title": "Business analyst",
+  "tags": [
+    "product",
+    "requirements",
+    "user stories"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

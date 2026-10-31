@@ -1,0 +1,10 @@
+{
+  "title": "Account executive",
+  "tags": [
+    "sales",
+    "discovery calls",
+    "proposals"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

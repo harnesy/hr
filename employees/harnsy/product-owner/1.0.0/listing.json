@@ -1,0 +1,10 @@
+{
+  "title": "Product owner",
+  "tags": [
+    "product",
+    "backlog",
+    "acceptance criteria"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}

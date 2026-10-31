@@ -1,0 +1,10 @@
+{
+  "title": "UX researcher",
+  "tags": [
+    "design",
+    "user research",
+    "usability testing"
+  ],
+  "harnsy": ">=0.11.0",
+  "publisher_name": "harnsy"
+}
