@@ -12,18 +12,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Base branch (the check's code)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: base
           persist-credentials: false
       - name: Pull request (files to read)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: pr
           persist-credentials: false
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: '1.22'
           cache: false
