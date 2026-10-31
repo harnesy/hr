@@ -4,6 +4,8 @@ name: check
 on:
   pull_request:
     branches: [main]
+    # edited: the confirmations in the description are part of the check.
+    types: [opened, synchronize, reopened, edited]
 permissions:
   contents: read
 jobs:
@@ -30,8 +32,11 @@ jobs:
       - name: Check
         env:
           AUTHOR: ${{ github.event.pull_request.user.login }}
+          AUTHOR_ID: ${{ github.event.pull_request.user.id }}
+          BODY: ${{ github.event.pull_request.body }}
         run: |
           cd base/tools/check
           go build -buildvcs=false -o "$RUNNER_TEMP/check" .
           cd "$GITHUB_WORKSPACE"
-          "$RUNNER_TEMP/check" --dir pr --base base --author "$AUTHOR"
+          printf '%s' "$BODY" > "$RUNNER_TEMP/body.md"
+          "$RUNNER_TEMP/check" --dir pr --base base --author "$AUTHOR" --author-id "$AUTHOR_ID" --body "$RUNNER_TEMP/body.md"
