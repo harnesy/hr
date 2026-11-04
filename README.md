@@ -20,6 +20,8 @@ examples and the scripts of its skills.
 ```
 employees/<publisher>/<name>/<version>/   one employee version: bundle.json, listing.json, avatar, docs/, skills/
 publishers/<publisher>.json               the publisher: shown name, description, GitHub login(s)
+changes/<publisher>/<name>.json           what each version changed (shown on the employee's page)
+categories/<id>.json                      a department list: name, summary, members
 revoked.json                              withdrawn versions
 tools/check/                              the automatic check (Go)
 ```

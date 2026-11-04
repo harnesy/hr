@@ -1,0 +1,10 @@
+{
+  "title": "Customer success manager",
+  "tags": [
+    "onboarding",
+    "account health",
+    "renewals"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

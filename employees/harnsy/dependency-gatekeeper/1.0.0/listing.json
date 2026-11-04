@@ -1,0 +1,11 @@
+{
+  "title": "Dependency gatekeeper",
+  "tags": [
+    "dependencies",
+    "open source",
+    "technology choice"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Archetype: sceptic of the new. A fictional AI character defined only by how it works; not based on any real person."
+}

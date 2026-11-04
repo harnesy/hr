@@ -1,0 +1,10 @@
+{
+  "title": "Chief of staff",
+  "tags": [
+    "meeting briefs",
+    "goals draft",
+    "decision log"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

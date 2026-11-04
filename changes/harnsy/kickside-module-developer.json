@@ -1,0 +1,6 @@
+{
+  "1.0.0": [
+    "First version: builds KickSide modules from the official template: tables, endpoints, access rights, agent tools and a Hub release.",
+    "Uses live development tools only on a development copy, and checks access on the copy itself, not only in tests."
+  ]
+}

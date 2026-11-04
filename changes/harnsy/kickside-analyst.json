@@ -1,0 +1,6 @@
+{
+  "1.0.0": [
+    "First version: turns a client's plain-words wish into a short KickSide task with acceptance criteria and the smallest useful version first.",
+    "Hands the result back to the client in plain words with the tester's screenshots, and turns later wishes into change requests."
+  ]
+}

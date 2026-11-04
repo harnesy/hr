@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "Keeps scripts, tools and operators in check: scans their file and function sizes before and after a change and reports the difference.",
+    "Learns the project's own rules and tools before the first change."
+  ]
+}

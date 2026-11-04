@@ -1,0 +1,6 @@
+{
+  "1.0.0": [
+    "First version: checks KickSide modules in a running copy as each role, in the browser and after a restart.",
+    "Writes the acceptance report with screenshots and says plainly which steps were checked and which were not."
+  ]
+}

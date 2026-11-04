@@ -1,0 +1,52 @@
+{
+  "_comment": "Sample shot file for take.mjs. Times are seconds from the start of the video. Each shot ends on its 'end' (or lasts 'duration'); the take pads it to that boundary, and the caption cue uses the same boundary. Action 'at' is seconds from the shot's start. Targets: role+name, label, placeholder, testId, text, or selector as a last resort.",
+  "baseUrl": "http://localhost:8000/",
+  "start": "/",
+  "viewport": { "width": 1280, "height": 720 },
+  "colorScheme": "light",
+  "locale": "en-US",
+  "cursor": true,
+  "zoom": 1.25,
+  "zoomRoot": "body",
+  "localStorage": { "example.hint-dismissed": "1" },
+  "prelude": [
+    { "do": "wait", "target": { "role": "heading", "name": "Projects" } }
+  ],
+  "ready": { "text": "3 projects" },
+  "poster": 2.0,
+  "shots": [
+    {
+      "id": "1",
+      "title": "The project list",
+      "end": 4.0,
+      "caption": { "en": "All your projects on one page.", "es": "Todos tus proyectos en una página." },
+      "actions": [
+        { "do": "label", "text": "sample data", "corner": "top-right" },
+        { "at": 1.0, "do": "point", "target": { "role": "link", "name": "Garden planner" }, "settle": 0 },
+        { "at": 3.0, "do": "click", "target": { "role": "link", "name": "Garden planner" }, "settle": 300, "after": 0 }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Add a task",
+      "end": 9.5,
+      "caption": { "en": "Type a task and press Add.", "es": "Escribe una tarea y pulsa Añadir." },
+      "actions": [
+        { "do": "wait", "target": { "role": "heading", "name": "Garden planner" } },
+        { "at": 0.5, "do": "type", "target": { "label": "New task" }, "text": "Water the tomatoes", "delay": 60 },
+        { "at": 3.5, "do": "click", "target": { "role": "button", "name": "Add" }, "after": 0 }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Done",
+      "end": 13.0,
+      "caption": { "en": "The new task is at the top of the list.", "es": "La nueva tarea está arriba de la lista." },
+      "actions": [
+        { "do": "wait", "target": { "role": "listitem", "hasText": "Water the tomatoes" } },
+        { "at": 0.3, "do": "zoom", "target": { "role": "list" }, "scale": 1.25, "ms": 800 },
+        { "at": 2.6, "do": "unzoom", "ms": 350 }
+      ]
+    }
+  ]
+}

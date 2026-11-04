@@ -38,9 +38,11 @@ var (
 	githubRE = regexp.MustCompile(`^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$`)
 	secretRE = regexp.MustCompile(`AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{40,}|` +
 		`sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{32,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{35}`)
-	httpRE    = regexp.MustCompile(`http://[^\s"'<>)\]]+`)
-	itemRefRE = regexp.MustCompile(`\b[Ii]tems? #[0-9]+`)
-	scriptLic = []string{"MIT License", "Apache License", "CC0"}
+	httpRE = regexp.MustCompile(`http://[^\s"'<>)\]]+`)
+	// localHTTPRE: a link to the reader's own machine (a demo server on localhost) cannot be https; allowed (HR, #3648).
+	localHTTPRE = regexp.MustCompile(`^http://(localhost|127\.0\.0\.1)(:[0-9]{1,5})?([/?#]|$)`)
+	itemRefRE   = regexp.MustCompile(`\b[Ii]tems? #[0-9]+`)
+	scriptLic   = []string{"MIT License", "Apache License", "CC0"}
 	// textLic: the licences a community employee's text may carry (TERMS.md 3.1); ours are CC-BY-4.0.
 	textLic   = map[string]bool{"CC-BY-4.0": true, "CC0-1.0": true}
 	scriptIDs = map[string]bool{"MIT": true, "Apache-2.0": true, "CC0-1.0": true}
@@ -105,6 +107,8 @@ func checkTree(p *problems, dir string) int {
 			n++
 		}
 	}
+	checkChanges(p, dir)
+	checkCategories(p, dir)
 	if b, err := os.ReadFile(filepath.Join(dir, "revoked.json")); err == nil {
 		var r []string
 		if err := json.Unmarshal(b, &r); err != nil {
@@ -256,8 +260,11 @@ func checkVersion(p *problems, dir, v string) {
 		if secretRE.MatchString(s) {
 			p.add(fr, "looks like a key or token — remove it; never put secrets in an employee")
 		}
-		if m := httpRE.FindString(s); m != "" {
-			p.add(fr, "plain http link %s — use https://", m)
+		for _, m := range httpRE.FindAllString(s, -1) {
+			if !localHTTPRE.MatchString(m) {
+				p.add(fr, "plain http link %s — use https:// (only http://localhost is allowed)", m)
+				break
+			}
 		}
 		if m := itemRefRE.FindString(s); m != "" {
 			p.add(fr, "internal reference %q — retell it without item numbers", m)
@@ -267,7 +274,19 @@ func checkVersion(p *problems, dir, v string) {
 	if total > maxVersion {
 		p.add(rel, "%d bytes in all, at most %d", total, maxVersion)
 	}
-	skills := checkSkills(p, dir, v)
+	skills, needs0110, skillFiles := checkSkills(p, dir, v)
+	// Zip entries the signer packs: bundle.json, casebook, avatar, the skill files, manifest.json and the signature.
+	// harnsy 0.10.x refuses a pack over maxZipEntries (#3611 R1).
+	entries := 3 + skillFiles
+	if _, err := os.Stat(filepath.Join(v, casebookFile)); err == nil {
+		entries++
+	}
+	if av, _ := filepath.Glob(filepath.Join(v, "avatar.*")); len(av) > 0 {
+		entries++
+	}
+	if entries > maxZipEntries {
+		p.add(rel, "about %d zip entries, at most %d — harnsy 0.10.x refuses more; drop files", entries, maxZipEntries)
+	}
 	// bundle.json by the signer's rules.
 	bf := filepath.Join(rel, "bundle.json")
 	bj, err := os.ReadFile(filepath.Join(v, "bundle.json"))
@@ -324,6 +343,8 @@ func checkVersion(p *problems, dir, v string) {
 			p.add(filepath.Join(rel, "listing.json"), "harnsy wants >=MAJOR.MINOR.PATCH; cv_url only on https://hr.harnsy.dev/")
 		} else if len(skills) > 0 && l.Harnsy != "" && harnsyBelow(l.Harnsy, skillsFloor) {
 			p.add(filepath.Join(rel, "listing.json"), "harnsy %q: a bundle with skills needs >=%s", l.Harnsy, skillsFloor)
+		} else if needs0110 && (l.Harnsy == "" || harnsyBelow(l.Harnsy, skillsDirsFloor)) {
+			p.add(filepath.Join(rel, "listing.json"), "harnsy %q: a skill with references/, assets/ or more than %d files needs >=%s (an older harnsy refuses it) — set \"harnsy\": \">=%s\"", l.Harnsy, skillMaxFilesV10, skillsDirsFloor, skillsDirsFloor)
 		}
 		for _, f := range []struct{ name, v string }{{"subtitle", l.Subtitle}, {"license_note", l.LicenseNote}} {
 			if f.v != "" {
@@ -517,11 +538,16 @@ func contains(xs []string, s string) bool {
 // an optional LICENSE and flat scripts/<file>; bundle.json "skills" names every folder.
 const (
 	skillsMax      = 5
-	skillMaxFiles  = 20
+	skillMaxFiles  = 60       // harnsy #3591; more than skillMaxFilesV10 needs skillsDirsFloor
 	skillDocMax    = 64 << 10 // SKILL.md, LICENSE
 	skillScriptMax = 256 << 10
 	skillsTotalMax = 2 << 20
 	skillDescMax   = 1024
+	// skillMaxFilesV10: what harnsy 0.10.x takes in a skill; more files, or references/ or assets/, need skillsDirsFloor.
+	skillMaxFilesV10 = 20
+	skillsDirsFloor  = "0.11.0"
+	// maxZipEntries: the most zip entries harnsy 0.10.x reads (16 + 5 × 20 + 12), manifest.json and the signature included.
+	maxZipEntries = 16 + skillsMax*skillMaxFilesV10 + 12
 )
 
 var (
@@ -542,7 +568,8 @@ var (
 
 // checkSkills checks the layout of <version>/skills/ and returns the skill folders it holds. File contents (UTF-8, no
 // NUL, no secrets) and symlinks are checked by the walk in checkVersion.
-func checkSkills(p *problems, dir, v string) map[string]bool {
+func checkSkills(p *problems, dir, v string) (map[string]bool, bool, int) {
+	needs0110, nFiles := false, 0
 	found := map[string]bool{}
 	root := filepath.Join(v, "skills")
 	entries, err := os.ReadDir(root)
@@ -550,7 +577,7 @@ func checkSkills(p *problems, dir, v string) map[string]bool {
 		if st, e := os.Lstat(root); e == nil && !st.IsDir() {
 			p.add(relTo(dir, root), "a file — skills/ is a folder of skills/<name>/")
 		}
-		return found
+		return found, false, 0
 	}
 	total := 0
 	for _, e := range entries {
@@ -566,7 +593,7 @@ func checkSkills(p *problems, dir, v string) map[string]bool {
 			continue
 		}
 		found[e.Name()] = true
-		total += checkSkill(p, dir, filepath.Join(root, e.Name()), e.Name())
+		total += checkSkill(p, dir, filepath.Join(root, e.Name()), e.Name(), &needs0110, &nFiles)
 	}
 	if len(found) > skillsMax {
 		p.add(relTo(dir, root), "%d skills, at most %d — keep the ones the role needs most", len(found), skillsMax)
@@ -574,11 +601,12 @@ func checkSkills(p *problems, dir, v string) map[string]bool {
 	if total > skillsTotalMax {
 		p.add(relTo(dir, root), "%d bytes in all skills, at most %d — make the scripts smaller", total, skillsTotalMax)
 	}
-	return found
+	return found, needs0110, nFiles
 }
 
 // checkSkill checks one skills/<name>/ folder and returns its bytes.
-func checkSkill(p *problems, dir, sd, name string) int {
+func checkSkill(p *problems, dir, sd, name string, needs0110 *bool, nFiles *int) int {
+	newer := false
 	at := relTo(dir, sd)
 	files, size := 0, 0
 	var doc, lic []byte
@@ -605,7 +633,10 @@ func checkSkill(p *problems, dir, sd, name string) int {
 			doc, hasDoc = read(f, skillDocMax), true
 		case e.Name() == "LICENSE" && e.Type().IsRegular():
 			lic, hasLic = read(f, skillDocMax), true
-		case e.Name() == "scripts" && e.IsDir():
+		case (e.Name() == "scripts" || e.Name() == "references" || e.Name() == "assets") && e.IsDir():
+			if e.Name() != "scripts" {
+				newer = true
+			}
 			folded := map[string]string{}
 			scripts, _ := os.ReadDir(f)
 			for _, s := range scripts {
@@ -614,7 +645,7 @@ func checkSkill(p *problems, dir, sd, name string) int {
 				case s.Type()&fs.ModeSymlink != 0:
 					continue
 				case s.IsDir():
-					p.add(relTo(dir, sf), "a folder under scripts/ — keep scripts flat: skills/%s/scripts/<file>", name)
+					p.add(relTo(dir, sf), "a folder under %s/ — keep it flat: skills/%s/%s/<file>", e.Name(), name, e.Name())
 					continue
 				}
 				if err := skillScriptName(s.Name()); err != nil {
@@ -625,7 +656,9 @@ func checkSkill(p *problems, dir, sd, name string) int {
 				}
 				folded[strings.ToLower(s.Name())] = s.Name()
 				read(sf, skillScriptMax)
-				hasScripts = true
+				if e.Name() == "scripts" {
+					hasScripts = true
+				}
 			}
 		default:
 			p.add(relTo(dir, f), "not a skill file — a skill holds SKILL.md, LICENSE and scripts/<file> only (no hooks, commands, agents, MCP servers or plugin files)")
@@ -634,6 +667,13 @@ func checkSkill(p *problems, dir, sd, name string) int {
 	if files > skillMaxFiles {
 		p.add(at, "%d files, at most %d per skill", files, skillMaxFiles)
 	}
+	if files > skillMaxFilesV10 {
+		newer = true
+	}
+	if newer {
+		*needs0110 = true
+	}
+	*nFiles += files
 	if !hasDoc {
 		p.add(at, "no SKILL.md — add it with a frontmatter (name, description) and the steps")
 	} else if utf8.Valid(doc) {

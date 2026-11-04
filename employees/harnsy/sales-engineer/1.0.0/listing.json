@@ -1,0 +1,10 @@
+{
+  "title": "Sales engineer",
+  "tags": [
+    "demos",
+    "technical questionnaires",
+    "trials"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

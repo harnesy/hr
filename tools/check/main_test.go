@@ -85,7 +85,7 @@ func TestSkills(t *testing.T) {
 		{"extra file at skill root", map[string]string{"skills/video-record/hooks.json": "{}"}, one, "skills/video-record/hooks.json: not a skill file"},
 		{"mcp file", map[string]string{"skills/video-record/.mcp.json": "{}"}, one, "skills/video-record/.mcp.json: not a skill file"},
 		{"hooks folder", map[string]string{"skills/video-record/hooks/run.sh": "echo"}, one, "skills/video-record/hooks: not a skill file"},
-		{"nested scripts dir", map[string]string{"skills/video-record/scripts/lib/x.js": "x"}, one, "scripts/lib: a folder under scripts/ — keep scripts flat"},
+		{"nested scripts dir", map[string]string{"skills/video-record/scripts/lib/x.js": "x"}, one, "scripts/lib: a folder under scripts/ — keep it flat"},
 		{"device name", map[string]string{"skills/video-record/scripts/NUL.txt": "x"}, one, `script name "NUL.txt" is a device name on Windows`},
 		{"device name lowercase", map[string]string{"skills/video-record/scripts/com1.js": "x"}, one, `script name "com1.js" is a device name on Windows`},
 		{"case duplicate", map[string]string{"skills/video-record/scripts/Take.mjs": "x"}, one, "in another letter case"},
@@ -113,6 +113,13 @@ func TestSkills(t *testing.T) {
 		{"listing subtitle and license_note", map[string]string{"listing.json": `{"subtitle":"A character in the spirit of Ada Lovelace.","license_note":"No rights in the names are granted."}`}, one, ""},
 		{"listing subtitle on two lines", map[string]string{"listing.json": `{"subtitle":"one\ntwo"}`}, one, "subtitle: one line, printable characters only"},
 		{"listing license_note too long", map[string]string{"listing.json": `{"license_note":"` + strings.Repeat("x", 401) + `"}`}, one, "license_note: one line, 1..400 bytes"},
+		{"references need 0.11.0", map[string]string{"skills/video-record/references/api.md": "notes", "listing.json": `{"harnsy":">=0.10.0"}`}, one, `needs >=0.11.0`},
+		{"references with 0.11.0", map[string]string{"skills/video-record/references/api.md": "notes", "listing.json": `{"harnsy":">=0.11.0"}`}, one, ""},
+		{"assets with 0.11.0", map[string]string{"skills/video-record/assets/t.txt": "notes", "listing.json": `{"harnsy":">=0.11.0"}`}, one, ""},
+		{"references nested", map[string]string{"skills/video-record/references/x/y.md": "n", "listing.json": `{"harnsy":">=0.11.0"}`}, one, "a folder under references/"},
+		{"http localhost allowed", map[string]string{"skills/video-record/SKILL.md": testSkillDoc + "Open http://localhost:8000/ now.\n"}, one, ""},
+		{"http elsewhere refused", map[string]string{"skills/video-record/SKILL.md": testSkillDoc + "See http://example.com/x\n"}, one, "plain http link http://example.com/x"},
+		{"http localhost lookalike refused", map[string]string{"skills/video-record/SKILL.md": testSkillDoc + "See http://localhost.evil.com/x\n"}, one, "plain http link"},
 		{"listing unknown key", map[string]string{"listing.json": `{"subline":"x"}`}, one, `unknown field "subline"`},
 	}
 	for _, c := range cases {
@@ -148,11 +155,11 @@ func TestSkillsTotalSize(t *testing.T) {
 
 func TestSkillsTooManyFiles(t *testing.T) {
 	files := map[string]string{}
-	for i := 0; i < 20; i++ {
-		files["skills/video-record/scripts/s"+string(rune('a'+i))+".js"] = "x"
+	for i := 0; i < 58; i++ {
+		files["skills/video-record/scripts/s"+string(rune('a'+i%26))+string(rune('a'+i/26))+".js"] = "x"
 	}
 	got := strings.Join(testEmployee(t, files, []any{ref("video-record")}), "\n")
-	if !strings.Contains(got, "23 files, at most 20 per skill") {
+	if !strings.Contains(got, "61 files, at most 60 per skill") {
 		t.Fatalf("want the 20 files limit, got:\n%s", got)
 	}
 }
@@ -315,5 +322,32 @@ func TestBundleLicenceExpr(t *testing.T) {
 		if (len(p.list) == 0) != c.ok {
 			t.Errorf("%s %q: ok=%v, got:\n%s", c.pub, c.lic, c.ok, joined(p))
 		}
+	}
+}
+
+func TestSiteFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeFiles(t, dir, map[string]string{
+		"employees/acme/rec/1.0.0/bundle.json":   "{}",
+		"employees/acme/items/1.0.0/bundle.json": "{}",
+		"changes/acme/rec.json":                  `{"1.0.0":["fine"],"2.0.0":["no folder"]}`,
+		"changes/acme/ghost.json":                `{"1.0.0":["x"]}`,
+		"changes/acme/items.json":                `{"1.0.0":["see Item #12"]}`,
+		"categories/ok.json":                     `{"name":"Ok","summary":"s","members":["acme/rec"]}`,
+		"categories/Bad.json":                    `{"name":"x","summary":"s","members":[]}`,
+		"categories/gone.json":                   `{"name":"x","summary":"s","members":["acme/none","acme/none"]}`,
+	})
+	var p problems
+	checkChanges(&p, dir)
+	checkCategories(&p, dir)
+	got := joined(p)
+	for _, w := range []string{"rec.json: acme/rec has no version folder 2.0.0", "ghost.json: no employee acme/ghost", "internal reference",
+		"Bad.json: the file name is the category id", "member acme/none is not an employee", "member acme/none listed twice"} {
+		if !strings.Contains(got, w) {
+			t.Errorf("want %q in:\n%s", w, got)
+		}
+	}
+	if strings.Contains(got, "ok.json") {
+		t.Errorf("ok.json flagged:\n%s", got)
 	}
 }

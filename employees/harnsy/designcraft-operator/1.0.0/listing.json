@@ -1,0 +1,13 @@
+{
+  "title": "DesignCraft operator",
+  "tags": [
+    "page layout",
+    "print pdf",
+    "epub",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Pre-alpha: DesignCraft is not ready for everyday layout work yet; this employee checks every page and says what it could not do. Independent of DesignCraft's authors; not affiliated or endorsed. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "DesignCraft is an independent open-source project. harnsy and this employee are not affiliated with, sponsored by, endorsed by or certified by its authors. The name is used only to say which app this employee works with."
+}

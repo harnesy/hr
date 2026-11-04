@@ -1,0 +1,13 @@
+{
+  "title": "FigCraft operator",
+  "tags": [
+    "interface design",
+    "design tokens",
+    "design handoff",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Alpha: .fig files open only on a best-effort basis; sharing is a preview. Independent of FigCraft's authors; not affiliated or endorsed. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "FigCraft is an independent open-source project. harnsy and this employee are not affiliated with, sponsored by, endorsed by or certified by its authors. The name is used only to say which app this employee works with."
+}

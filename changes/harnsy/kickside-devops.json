@@ -1,0 +1,6 @@
+{
+  "1.0.0": [
+    "First version: runs a client's KickSide server with Docker, a reverse proxy with TLS, and backups checked by a restore.",
+    "Rolls out Hub module versions from staging to production with the owner's OK, and checks the wall to the host with a probe."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "title": "WordCraft operator",
+  "tags": [
+    "word processing",
+    "document formatting",
+    "tracked changes",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Alpha: .docx files from other apps are not yet tested at scale, so layout may shift. Independent of WordCraft's authors; not affiliated or endorsed. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "WordCraft is an independent open-source project. harnsy and this employee are not affiliated with, sponsored by, endorsed by or certified by its authors. The name is used only to say which app this employee works with."
+}

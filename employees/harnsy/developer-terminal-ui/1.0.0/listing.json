@@ -1,0 +1,13 @@
+{
+  "title": "Terminal UI developer",
+  "tags": [
+    "terminal ui",
+    "tui",
+    "kitty and sixel graphics",
+    "lua on wippy"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Works with the Wippy runtime; made by harnsy, not an official Wippy product. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "Wippy is an open-source runtime. This employee is made by harnsy and is not an official Wippy product, and Wippy has not reviewed or certified it. The name is used only to say which runtime this employee works with."
+}

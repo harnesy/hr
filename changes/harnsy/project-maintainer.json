@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "Checks code structure in every review: compares file, function and component sizes before and after the change and flags what grew.",
+    "Asks contributors for the exact fix when a hard size limit grew without a written OK, or the same code was copied a third time."
+  ]
+}

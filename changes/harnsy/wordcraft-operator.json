@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in WordCraft over its MCP server, with recipes proven on WordCraft 0.8.0.",
+    "Installs or updates the app only with your OK, checks every download, and starts it confined to your project folders.",
+    "Marks its tracked changes as an agent's, reopens and checks every delivered file, and leaves a one-page hand-over note."
+  ]
+}

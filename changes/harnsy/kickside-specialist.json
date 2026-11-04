@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: installs and runs KickSide on Wippy with the owner's OK, bound to loopback, with the admin's own password set at first boot.",
+    "Adds and updates Hub modules with a backup of the lock, registry history, database and key file, reads each plan and diffs the installed modules.",
+    "Builds agents, automations, connections, MCP access and user roles, and checks each one in the running platform, including as a member."
+  ]
+}

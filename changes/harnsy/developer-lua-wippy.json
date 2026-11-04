@@ -1,0 +1,10 @@
+{
+  "1.1.0": [
+    "Looks Wippy facts up in the Wippy docs page by page, names the page it used, and follows the project's runtime build when the two disagree."
+  ],
+  "1.0.0": [
+    "First version: builds apps and services in Lua on Wippy as supervised processes that talk by messages, with narrow security policies per entry.",
+    "Manages modules and dependencies by version range, from the module registry or from git tags, and backs up and checks the lock around every resolve.",
+    "Works test first with the runtime's own runner, probes the runtime's Lua for known quirks, and checks every change in the running app, not only in tests."
+  ]
+}

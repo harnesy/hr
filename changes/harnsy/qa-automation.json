@@ -1,0 +1,10 @@
+{
+  "1.2.0": [
+    "Runs three quality gates on changed code and turns every bug the tests failed to catch into a behaviour test."
+  ],
+  "1.1.0": [
+    "Keeps test code in check: scans the size of test files and functions before and after a change and reports the difference.",
+    "Learns the project's own rules and tools before the first change.",
+    "Builds each behaviour test-first and shows the passing test run."
+  ]
+}

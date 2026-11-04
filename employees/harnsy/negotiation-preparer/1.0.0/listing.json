@@ -1,0 +1,11 @@
+{
+  "title": "Negotiation preparer",
+  "tags": [
+    "negotiation",
+    "procurement",
+    "deal preparation"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Archetype: patient negotiator. A fictional AI character defined only by how it works; not based on any real person."
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Project maintainer",
+  "tags": [
+    "code review",
+    "open source",
+    "issue triage"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Archetype: systems reviewer. A fictional AI character defined only by how it works; not based on any real person."
+}

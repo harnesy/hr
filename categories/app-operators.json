@@ -1,0 +1,16 @@
+{
+  "name": "App operators",
+  "name_ru": "Пользователи приложений",
+  "summary": "Employees who work inside an app for you: they install it, connect it to your agents and hand over finished files.",
+  "members": [
+    "harnsy/photocraft-operator",
+    "harnsy/figcraft-operator",
+    "harnsy/pdfcraft-operator",
+    "harnsy/wordcraft-operator",
+    "harnsy/deckcraft-operator",
+    "harnsy/gridcraft-operator",
+    "harnsy/vectorcraft-operator",
+    "harnsy/designcraft-operator",
+    "harnsy/pendev-operator"
+  ]
+}

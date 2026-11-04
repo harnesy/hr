@@ -1,0 +1,10 @@
+{
+  "title": "Program manager",
+  "tags": [
+    "programme plan",
+    "dependencies",
+    "risk log"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

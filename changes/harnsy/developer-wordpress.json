@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "Keeps theme and plugin code in check: shared template parts and blocks, size limits, and sizes scanned before and after a change.",
+    "Learns the project's own rules and tools before the first change."
+  ]
+}

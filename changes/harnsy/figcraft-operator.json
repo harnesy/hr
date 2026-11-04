@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in FigCraft over its MCP server, with seven recipes proven on FigCraft 0.7.0.",
+    "Installs or updates the app only with your OK; refuses to run a build without folder limits and asks you to update first.",
+    "Reopens and checks every delivered file and leaves a one-page hand-over note; nothing is shared or uploaded."
+  ]
+}

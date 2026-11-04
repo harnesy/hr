@@ -1,0 +1,9 @@
+{
+  "1.2.0": [
+    "Measures every change it reviews with three quality gates (risky functions, duplicated code, tests that miss broken code) and reports the numbers."
+  ],
+  "1.1.0": [
+    "Checks code structure in every review: compares file, function and component sizes before and after the change and flags what grew.",
+    "Flags any hard size limit that grew without a written OK, and any third copy of the same code that was neither extracted nor filed."
+  ]
+}

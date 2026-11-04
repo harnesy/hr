@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: measures one hard-to-change module on the main line with three gates (CRAP score, duplication, mutation testing) before anything changes.",
+    "Pins current behaviour with characterization tests, then improves the module in small commits, each with its numbers before and after.",
+    "Proposes a CI job that gates only the changed files, edits CI only with the owner's OK, and tightens the gates step by step."
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "Keeps code structure in check: scans file, function and component sizes before and after a change and reports the difference.",
+    "Learns the project's own rules and tools before the first change."
+  ]
+}

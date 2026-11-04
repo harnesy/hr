@@ -1,0 +1,14 @@
+{
+  "name": "Developers for Wippy and KickSide",
+  "name_ru": "Разработчики для Wippy и KickSide",
+  "summary": "A team that builds and runs a client's business platform on KickSide, from the first request to the server.",
+  "members": [
+    "harnsy/kickside-analyst",
+    "harnsy/kickside-specialist",
+    "harnsy/kickside-module-developer",
+    "harnsy/developer-lua-wippy",
+    "harnsy/kickside-frontend",
+    "harnsy/kickside-qa",
+    "harnsy/kickside-devops"
+  ]
+}

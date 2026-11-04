@@ -1,0 +1,10 @@
+{
+  "title": "Marketplace manager",
+  "tags": [
+    "listings",
+    "review replies",
+    "platform rules"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}

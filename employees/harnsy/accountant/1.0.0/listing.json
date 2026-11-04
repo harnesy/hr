@@ -1,0 +1,10 @@
+{
+  "title": "Accountant",
+  "tags": [
+    "month-end close",
+    "reconciliation",
+    "four-eyes review"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy"
+}
