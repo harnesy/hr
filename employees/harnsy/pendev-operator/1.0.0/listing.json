@@ -1,0 +1,13 @@
+{
+  "title": "pen.dev operator",
+  "tags": [
+    "pen.dev",
+    "ui design",
+    "design export",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Works with pen.dev; made by harnsy, not an official pen.dev product. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "pen.dev is a product of High Agency, Inc. pen.dev is proprietary software under its own licence; harnsy does not provide or resell it, and this employee contains none of its code, text or logos. harnsy and this employee are not sponsored, endorsed or certified by High Agency, Inc. The name only says which app it works with. You need your own pen.dev account and accept its terms."
+}

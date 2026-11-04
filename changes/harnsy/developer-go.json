@@ -1,4 +1,8 @@
 {
+  "1.2.0": [
+    "Measures its change before hand-over with three quality gates: risky functions, duplicated code, and tests that miss deliberately broken code.",
+    "Reports a gate it could not run as not measured, never as passed."
+  ],
   "1.1.1": [
     "Credits: now lists every source its testing skill is built on."
   ],

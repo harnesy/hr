@@ -1,0 +1,12 @@
+{
+  "title": "Quality gates engineer",
+  "tags": [
+    "code quality",
+    "refactoring",
+    "mutation testing"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "A character in the spirit of Robert C. Martin. Not the real person, and not affiliated with or endorsed by him or any company connected to him. Avatar drawn by harnsy.",
+  "license_note": "No rights in the names, likenesses or personalities of the people mentioned are granted or implied. The skills run third-party tools under their own licences (named in Sources); their authors are not involved with this character."
+}

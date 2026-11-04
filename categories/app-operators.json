@@ -10,6 +10,7 @@
     "harnsy/deckcraft-operator",
     "harnsy/gridcraft-operator",
     "harnsy/vectorcraft-operator",
-    "harnsy/designcraft-operator"
+    "harnsy/designcraft-operator",
+    "harnsy/pendev-operator"
   ]
 }

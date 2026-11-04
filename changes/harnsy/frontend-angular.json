@@ -1,4 +1,8 @@
 {
+  "1.2.0": [
+    "Measures its change before hand-over with three quality gates: risky functions, duplicated code, and tests that miss deliberately broken code.",
+    "Reports a gate it could not run as not measured, never as passed."
+  ],
   "1.1.0": [
     "Keeps code structure in check: scans file, function and component sizes before and after a change and reports the difference."
   ]

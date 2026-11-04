@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: works in pen.dev for you over its MCP tools or its headless CLI, with your own pen.dev install and account.",
+    "pen.dev has no folder limits: works only in a job folder you name, with your OK, and checks afterwards that nothing outside it changed.",
+    "Checks the open document before every edit, looks at every change on a screenshot, and leaves a one-page hand-over note."
+  ]
+}
