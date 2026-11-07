@@ -1,4 +1,9 @@
 {
+  "1.2.0": [
+    "Follows Buggregator 2.7.0: without an IDE it can drive a paused PHP request, stepping or stopping it only on your OK for each action.",
+    "Saved breakpoints and the 7 new Xdebug MCP tools; it says control is on by default and offers a read-only switch, and lists breakpoints at the end.",
+    "Knows the mock editor and JSON-only OpenAPI import, Docker tag 2.7.0, the container memory limit and Ray chained calls in one event."
+  ],
   "1.1.0": [
     "Follows Buggregator 2.6.0: the Xdebug proxy and the mock server are in a release now, marked since 2.6.0.",
     "Works mocks over MCP with the 11 new mock tools; each rule change waits for your OK, and MCP_MOCK_WRITE=false makes them read-only.",
