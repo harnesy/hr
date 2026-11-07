@@ -1,0 +1,7 @@
+{
+  "1.0.0": [
+    "First version: runs Buggregator for your local development, starting it with your OK and keeping every port on 127.0.0.1.",
+    "Connects your app's SDKs module by module, gives your agent the events over MCP, and reads test mail and one-time codes for end-to-end tests.",
+    "Xdebug proxy and mock server: included, and each needs the next Buggregator release or a master build."
+  ]
+}

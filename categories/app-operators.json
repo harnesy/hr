@@ -11,6 +11,7 @@
     "harnsy/gridcraft-operator",
     "harnsy/vectorcraft-operator",
     "harnsy/designcraft-operator",
-    "harnsy/pendev-operator"
+    "harnsy/pendev-operator",
+    "harnsy/buggregator-operator"
   ]
 }
