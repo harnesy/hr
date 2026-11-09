@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "New: access for AI readers, with the llms-visibility skill: robots rules per AI bot, Markdown copies, Accept negotiation, llms.txt and logging.",
+    "Asks you before choosing whether AI may train on your site, and never promises that any AI will cite your pages."
+  ]
+}
