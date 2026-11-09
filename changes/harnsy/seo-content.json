@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "New: pages AI answers can quote: one question per section, facts with source and date, tables for comparisons.",
+    "Each brief gets an «AI answer» check; Markdown and llms.txt needs go to the technical SEO specialist. No citation promises."
+  ]
+}
