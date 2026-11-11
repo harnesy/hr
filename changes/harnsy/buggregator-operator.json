@@ -1,4 +1,8 @@
 {
+  "1.4.0": [
+    "Follows Buggregator 2.9.0: connects the JavaScript, Python and Go Sentry SDKs too, each with a test event; a browser DSN goes into dev builds only.",
+    "Says Buggregator is prepared for the MCP Registry but not listed there yet, and uses Docker tag 2.9.0."
+  ],
   "1.3.0": [
     "Follows Buggregator 2.8.0: reads Xdebug function traces with the 4 new MCP tools; records and uploads them only from dev apps on your OK.",
     "Says at setup that Buggregator now asks GitHub for new releases, and offers to turn that check off.",
