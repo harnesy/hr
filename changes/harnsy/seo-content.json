@@ -2,5 +2,9 @@
   "1.1.0": [
     "New: pages AI answers can quote: one question per section, facts with source and date, tables for comparisons.",
     "Each brief gets an «AI answer» check; Markdown and llms.txt needs go to the technical SEO specialist. No citation promises."
+  ],
+  "1.2.0": [
+    "New skills: blog-refresher (gap table, plan, your approval, then a draft), seo-title-optimization, intro and customer-journey.",
+    "Refreshes and intros are drafts for a person to review; a year or a number goes in a title only when the page delivers it."
   ]
 }

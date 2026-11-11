@@ -2,5 +2,9 @@
   "1.1.0": [
     "New: access for AI readers, with the llms-visibility skill: robots rules per AI bot, Markdown copies, Accept negotiation, llms.txt and logging.",
     "Asks you before choosing whether AI may train on your site, and never promises that any AI will cite your pages."
+  ],
+  "1.2.0": [
+    "New: blitz-seo, a logged 30-day sprint for one page and one query, with earned links only and drafts for you to send.",
+    "New: seo-autopilot, a repeated SEO run in your site's repository; every change is a pull request for you to review, never merged by the agent."
   ]
 }
