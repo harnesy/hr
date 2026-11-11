@@ -1,0 +1,6 @@
+{
+  "1.1.0": [
+    "New: reference research before a new token direction or pattern, with the refero-research skill; each proposal names its references.",
+    "Works with the Refero MCP if you connected it, and without it from your own references; your existing system outranks any reference."
+  ]
+}
