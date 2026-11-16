@@ -1,4 +1,9 @@
 {
+  "1.5.0": [
+    "Follows Buggregator 2.10.0: names a Sentry project by the DSN key once it is listed in YAML, for SDKs that allow only numeric DSN paths.",
+    "Sends test SMS through the new Twilio-compatible API, Symfony's notifier included behind a local TLS front, and uses Docker tag 2.10.0.",
+    "Knows the 64 MB Sentry size limit, proxy bodies stored decoded, and how to narrow the allowed browser origins with CORS_ORIGINS."
+  ],
   "1.4.0": [
     "Follows Buggregator 2.9.0: connects the JavaScript, Python and Go Sentry SDKs too, each with a test event; a browser DSN goes into dev builds only.",
     "Says Buggregator is prepared for the MCP Registry but not listed there yet, and uses Docker tag 2.9.0."
