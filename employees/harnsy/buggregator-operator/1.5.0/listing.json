@@ -1,0 +1,13 @@
+{
+  "title": "Buggregator app operator",
+  "tags": [
+    "buggregator",
+    "debugging",
+    "mcp",
+    "app operator"
+  ],
+  "harnsy": ">=0.10.0",
+  "publisher_name": "harnsy",
+  "subtitle": "Works with Buggregator; made by harnsy, not an official Buggregator product. A fictional AI character defined only by how it works; not based on any real person.",
+  "license_note": "Buggregator is an independent open-source project. This employee contains no passages of its code or documentation; commands and setting names are quoted because they are facts. You run Buggregator yourself under its own licence. Buggregator, Sentry, Ray, Xdebug, PHP, Docker, Claude Code and Codex are names of their owners' products; harnsy is not affiliated with or endorsed by them."
+}
