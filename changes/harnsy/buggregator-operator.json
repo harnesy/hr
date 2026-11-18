@@ -1,4 +1,10 @@
 {
+  "1.6.0": [
+    "Follows Buggregator 2.11.1: offers a by-hand check of the release signature before the first start, and uses Docker tag 2.11.1.",
+    "Uses the new update button only on your yes for that version; UPDATE_SELF=off holds the version.",
+    "Sets up automatic cleanup of old events only on your OK, since it deletes data; pinned events stay.",
+    "Sends Inspector traces to a named project and keeps JavaScript source fetching on private addresses."
+  ],
   "1.5.0": [
     "Follows Buggregator 2.10.0: names a Sentry project by the DSN key once it is listed in YAML, for SDKs that allow only numeric DSN paths.",
     "Sends test SMS through the new Twilio-compatible API, Symfony's notifier included behind a local TLS front, and uses Docker tag 2.10.0.",
