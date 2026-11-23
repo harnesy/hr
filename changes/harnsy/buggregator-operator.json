@@ -1,4 +1,10 @@
 {
+  "1.7.0": [
+    "Follows Buggregator 2.14.0 and uses Docker tag 2.14.0.",
+    "Connects OpenTelemetry traces and logs over HTTP, broadcast events, cron check-ins, CSP reports and queue jobs, each with a test event.",
+    "With sign-on, helps you set who may sign in; it relays test mail to a real inbox only on your yes and to your own addresses.",
+    "Reads logs, filtered feeds, traces and N+1 queries for you while it looks for the cause of an error."
+  ],
   "1.6.0": [
     "Follows Buggregator 2.11.1: offers a by-hand check of the release signature before the first start, and uses Docker tag 2.11.1.",
     "Uses the new update button only on your yes for that version; UPDATE_SELF=off holds the version.",
